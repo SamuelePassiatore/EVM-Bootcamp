@@ -5,7 +5,6 @@
 ## Execution 1
 
 - Wallet Address: `0x5B38Da6a701c568545dCfcB03FcB875f56beddC4`
-- Contract Address: `0xDA0bab807633f07f013f94DD0E6A4F96F8742B53`
 - Executed Function: helloWorld
 - execution cost: 3350
 - input: 0xc605f76c
