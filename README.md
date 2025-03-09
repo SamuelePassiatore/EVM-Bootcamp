@@ -1,1 +1,1 @@
-# EVM-Bootcamp
+# EVM-Bootcamp Team Six
