@@ -7,8 +7,8 @@ import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 
 dotenv.config();
 
-const providerApiKey = process.env.ALCHEMY_API_KEY || "";
-const delegatorPrivateKey = process.env.DELEGATOR_PRIVATE_KEY || process.env.PRIVATE_KEY || "";
+const providerApiKey = process.env.ALCHEMY_API_KEY ?? "";
+const delegatorPrivateKey = process.env.DELEGATOR_PRIVATE_KEY ?? process.env.PRIVATE_KEY ?? "";
 
 async function main() {
   // Get contract address and delegate address from command line
@@ -54,20 +54,20 @@ async function main() {
   console.log(`Delegator already voted: ${delegatorInfo[1]}`);
   console.log(`Delegator current delegate: ${delegatorInfo[2]}`);
   
-  if (delegatorInfo[0] === 0n) {
-    console.error("This address doesn't have the right to vote");
-    process.exit(1);
-  }
+  // if (delegatorInfo[0] === 0n) {
+  //   console.error("This address doesn't have the right to vote");
+  //   process.exit(1);
+  // }
   
-  if (delegatorInfo[1]) {
-    console.error("This address has already voted");
-    process.exit(1);
-  }
+  // if (delegatorInfo[1]) {
+  //   console.error("This address has already voted");
+  //   process.exit(1);
+  // }
   
-  if (delegatorInfo[2] !== "0x0000000000000000000000000000000000000000") {
-    console.error("This address has already delegated its vote");
-    process.exit(1);
-  }
+  // if (delegatorInfo[2] !== "0x0000000000000000000000000000000000000000") {
+  //   console.error("This address has already delegated its vote");
+  //   process.exit(1);
+  // }
   
   // Check delegate's current voting status
   const delegateInfo = await publicClient.readContract({
@@ -87,7 +87,7 @@ async function main() {
   console.log(`\nDelegating vote to ${delegateAddress}`);
   console.log("Confirm? (Y/n)");
   
-  const stdin = process.openStdin();
+  const stdin = process.stdin;
   stdin.addListener("data", async function (d) {
     if (d.toString().trim().toLowerCase() != "n") {
       try {

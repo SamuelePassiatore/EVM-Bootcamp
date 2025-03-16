@@ -78,8 +78,8 @@ async function main() {
   })) as any[];
   
   const name = hexToString(proposal[0], { size: 32 });
-  console.log(`Voting to proposal "${name}" (index: ${proposalIndex}, current votes: ${proposal[1]})`);
-  console.log("Confirm? (Y/n)");
+  console.log(`Proposal details : "${name}" (index: ${proposalIndex}, current votes: ${proposal[1]})`);
+  console.log("Do you want to vote for this proposal ? (Y/n)");
   
   const stdin = process.stdin;
   stdin.addListener("data", async function (d) {
