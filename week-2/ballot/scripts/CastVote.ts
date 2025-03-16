@@ -51,15 +51,15 @@ async function main() {
   console.log(`Current voting weight: ${voterInfo[0]}`);
   console.log(`Already voted: ${voterInfo[1]}`);
   
-  if (voterInfo[0] === 0n) {
-    console.error("This address doesn't have the right to vote");
-    process.exit(1);
-  }
+  // if (voterInfo[0] === 0n) {
+  //   console.error("This address doesn't have the right to vote");
+  //   process.exit(1);
+  // }
   
-  if (voterInfo[1]) {
-    console.error("This address has already voted");
-    process.exit(1);
-  }
+  // if (voterInfo[1]) {
+  //   console.error("This address has already voted");
+  //   process.exit(1);
+  // }
   
   // Check if proposal exists
   const proposalCount = await getProposalCount(publicClient, contractAddress);
