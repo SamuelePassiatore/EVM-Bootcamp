@@ -6,8 +6,8 @@ import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 
 dotenv.config();
 
-const providerApiKey = process.env.ALCHEMY_API_KEY || "";
-const chairpersonPrivateKey = process.env.PRIVATE_KEY || "";
+const providerApiKey = process.env.ALCHEMY_API_KEY ?? "";
+const chairpersonPrivateKey = process.env.PRIVATE_KEY ?? "";
 
 async function main() {
   // Get contract address and voter address from command line
@@ -46,11 +46,11 @@ async function main() {
     address: contractAddress,
     abi,
     functionName: "chairperson",
-  });
+  }) as string;
   
-  if (contractChairperson.toLowerCase() !== chairperson.account.address.toLowerCase()) {
-    throw new Error("The connected account is not the chairperson of the contract");
-  }
+  // if (contractChairperson.toLowerCase() !== chairperson.account.address.toLowerCase()) {
+  //   throw new Error("The connected account is not the chairperson of the contract");
+  // }
   
   // Check voter's current voting weight
   const voterInfo = await publicClient.readContract({
@@ -62,15 +62,15 @@ async function main() {
   
   console.log(`Current voting weight for ${voterAddress}: ${voterInfo[0]}`);
   
-  if (voterInfo[0] > 0n) {
-    console.log("This voter already has voting rights");
-    process.exit(0);
-  }
+  // if (voterInfo[0] > 0n) {
+  //   console.log("This voter already has voting rights");
+  //   process.exit(0);
+  // }
   
   console.log(`Giving right to vote to ${voterAddress}`);
   console.log("Confirm? (Y/n)");
   
-  const stdin = process.openStdin();
+  const stdin = process.stdin;
   stdin.addListener("data", async function (d) {
     if (d.toString().trim().toLowerCase() != "n") {
       try {

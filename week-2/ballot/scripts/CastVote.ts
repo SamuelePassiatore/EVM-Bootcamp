@@ -7,8 +7,8 @@ import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 
 dotenv.config();
 
-const providerApiKey = process.env.ALCHEMY_API_KEY || "";
-const voterPrivateKey = process.env.VOTER_PRIVATE_KEY || process.env.PRIVATE_KEY || "";
+const providerApiKey = process.env.ALCHEMY_API_KEY ?? "";
+const voterPrivateKey = process.env.VOTER_PRIVATE_KEY ?? process.env.PRIVATE_KEY ?? "";
 
 async function main() {
   // Get contract address and proposal index from command line
@@ -81,7 +81,7 @@ async function main() {
   console.log(`Voting to proposal "${name}" (index: ${proposalIndex}, current votes: ${proposal[1]})`);
   console.log("Confirm? (Y/n)");
   
-  const stdin = process.openStdin();
+  const stdin = process.stdin;
   stdin.addListener("data", async function (d) {
     if (d.toString().trim().toLowerCase() != "n") {
       try {
