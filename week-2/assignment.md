@@ -41,7 +41,7 @@ Already voted: true
 This address has already voted for proposal "arg1"
 ```
 
-Try to vote for proposal 1 with another address:
+Try to vote for proposal 1 with another address and it refused the request:
 
 ```shell
 PS C:\Users\samuw\Documents\EVM-Bootcamp\week-2\ballot> npx ts-node --files ./scripts/CastVote.ts "0x2af1b834ba184f2565577b7f095fc284c41489fa" "0"
@@ -169,5 +169,26 @@ Version: viem@2.23.11
   functionName: 'vote',
   sender: '0x86fd0D762B53f21011e531fa57629D294d576A36'
 }
+
+
 ```
 
+
+Try to vote for proposal 1 with another address after give right to vote script and it worked:
+
+```shell
+PS C:\Users\samuw\Documents\EVM-Bootcamp\week-2\ballot> npx ts-node --files ./scripts/CastVote.ts "0x2af1b834ba184f2565577b7f095fc284c41489fa" "0"
+>>
+Voter address: 0x86fd0D762B53f21011e531fa57629D294d576A36
+Current voting weight: 1
+Already voted: false
+Proposal selected:
+Voting to proposal "arg1" (index: 0, current votes: 1)
+Confirm? (Y/n)
+y
+Transaction hash: 0x789949c9e31c08afeb94b7bd834abc90e4c594de5cec9b3c5cfab62b8734f7e4
+Waiting for confirmations...
+Transaction confirmed in block: 7915367n
+Updated vote count for "arg1": 2
+
+```
