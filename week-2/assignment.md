@@ -511,3 +511,22 @@ Delegator delegate: 0x86fd0D762B53f21011e531fa57629D294d576A36
 Delegate voting weight: 1
 ```
 
+Made a query with all informations about contract and interactions with proposals:
+
+```shell
+npx ts-node --files ./scripts/QueryResults.ts "0x2af1b834ba184f2565577b7f095fc284c41489fa"
+>> 
+Contract information:
+Address: 0x2af1b834ba184f2565577b7f095fc284c41489fa
+Chairperson: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+
+Total proposals: 3
+
+Proposals:
+Proposal 0: "arg1" - 3 vote(s)
+Proposal 1: "arg2" - 0 vote(s)
+Proposal 2: "arg3" - 0 vote(s)
+
+Winning proposal: 0 - "arg1"
+```
+
