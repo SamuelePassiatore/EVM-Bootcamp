@@ -1,9 +1,9 @@
 import { viem } from "hardhat";
-import { stringToHex, hexToString } from "viem";
+import { hexToString } from "viem";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const TOKENIZED_BALLOT_ADDRESS = process.env.TOKENIZED_BALLOT_ADDRESS ?? "";
+const TOKENIZED_BALLOT_ADDRESS = "0x958192c1479731d3b3c554510c4cc1398628aafb";
 
 // Function to convert bytes32 to string
 function bytes32ToString(bytes32: `0x${string}`): string {
@@ -22,7 +22,7 @@ async function main() {
   try {
     // Get the TokenizedBallot contract instance
     const ballotContract = await viem.getContractAt(
-      "TokenizedBallot", 
+      "TokenizedBallot",
       TOKENIZED_BALLOT_ADDRESS as `0x${string}`
     );
     
@@ -43,9 +43,9 @@ async function main() {
     try {
       while (true) {
         const proposal = await ballotContract.read.proposals([BigInt(proposalCount)]);
-        proposals.push({ 
-          name: bytes32ToString(proposal[0]), 
-          voteCount: proposal[1] 
+        proposals.push({
+          name: bytes32ToString(proposal[0]),
+          voteCount: proposal[1]
         });
         proposalCount++;
       }
@@ -77,7 +77,7 @@ async function main() {
     console.log("\nVote distribution:");
     proposals.forEach((proposal) => {
       const percentage = totalVotes > 0n 
-        ? Number((proposal.voteCount * 10000n) / totalVotes) / 100 
+        ? Number((proposal.voteCount * 10000n) / totalVotes) / 100
         : 0;
       console.log(`${proposal.name}: ${percentage}%`);
     });

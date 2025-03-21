@@ -297,3 +297,30 @@ Voting power details:
 - Power spent in ballot: 20
 - Remaining power for ballot: 80
 ```
+
+Querying result :
+
+```shell
+❯ npx hardhat run scripts/QueryResults.ts --network sepolia
+Querying voting results...
+TokenizedBallot contract address: 0x958192c1479731d3b3c554510c4cc1398628aafb
+Token contract address: 0xEe30BaA4275D5EFbE6418cAc7DD1Cd1f43810c8E
+Target block number: 7952763
+Found 3 proposals
+
+Proposals and vote counts:
+0: Proposal 1 - 0 votes
+1: Proposal 2 - 2 votes
+2: Proposal 3 - 18 votes
+
+Winning proposal ID: 2
+Winning proposal name: Proposal 3
+Winning proposal vote count: 18
+
+Total votes cast: 20
+
+Vote distribution:
+Proposal 1: 0%
+Proposal 2: 10%
+Proposal 3: 90%
+```
