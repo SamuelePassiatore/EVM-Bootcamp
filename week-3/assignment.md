@@ -77,3 +77,28 @@ MethodID: 0x40c10f19
 [1]:  0000000000000000000000000000000000000000000000000000000000000064
 ```
 
+Delegating voting power to deployer address :
+
+```shell
+❯ npx hardhat run scripts/DelegateVote.ts --network sepolia                                                                      ─╯
+Delegating voting power...
+Token contract address: 0xee30baa4275d5efbe6418cac7dd1cd1f43810c8e
+Voter address: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+Delegating to: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+Voter's voting power before delegation: 0
+Delegatee's voting power before: 0
+Delegation transaction hash: 0xfefdf86d61cc038fe84e2faf3462ea3562d3553f9e828b0f0d40d34bfb97a16a
+Transaction confirmed in block 7952649
+Voter's voting power after delegation: 100
+Delegatee's voting power after: 100
+Voter is now delegating to: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+```
+
+- Transaction details (hash: [0xfefdf86d61cc038fe84e2faf3462ea3562d3553f9e828b0f0d40d34bfb97a16a](https://sepolia.etherscan.io/tx/0xfefdf86d61cc038fe84e2faf3462ea3562d3553f9e828b0f0d40d34bfb97a16a)) :
+
+```markdown
+Function: delegate(address delegatee) ***
+
+MethodID: 0x5c19a95c
+[0]:  0000000000000000000000008790f7d137040d6dad7a0aeaee994cfd76577b23
+```
