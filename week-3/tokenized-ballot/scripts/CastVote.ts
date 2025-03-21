@@ -1,17 +1,30 @@
 import { viem } from "hardhat";
+import { createPublicClient, http, createWalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { sepolia } from "viem/chains";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const TOKENIZED_BALLOT_ADDRESS = process.env.TOKENIZED_BALLOT_ADDRESS ?? "";
-const PROPOSAL_ID = process.env.PROPOSAL_ID ? parseInt(process.env.PROPOSAL_ID) : 0;
-const VOTE_AMOUNT = process.env.VOTE_AMOUNT ? BigInt(process.env.VOTE_AMOUNT) : 1n;
+const deployerPrivateKey = process.env.PRIVATE_KEY ?? "";
+const providerApiKey = process.env.ALCHEMY_API_KEY ?? "";
+const TOKENIZED_BALLOT_ADDRESS = "0x958192c1479731d3b3c554510c4cc1398628aafb";
+const PROPOSAL_ID = Math.floor(Math.random() * 3); // Randomly selects 0, 1, or 2
+const VOTE_AMOUNT = BigInt(Math.floor(Math.random() * 10) + 1); // Random vote amount between 1 and 100
 
 async function main() {
   console.log("Casting vote...");
 
   // Get the public client and wallet clients
-  const publicClient = await viem.getPublicClient();
-  const [deployer, voter] = await viem.getWalletClients();
+  const publicClient = createPublicClient({
+      chain: sepolia,
+      transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
+  });
+  const account = privateKeyToAccount(`0x${deployerPrivateKey}`);
+  const deployer = createWalletClient({
+      account,
+      chain: sepolia,
+      transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
+  });
   
   // Check we have the ballot address
   if (!TOKENIZED_BALLOT_ADDRESS) {
@@ -21,12 +34,12 @@ async function main() {
   try {
     // Get the TokenizedBallot contract instance
     const ballotContract = await viem.getContractAt(
-      "TokenizedBallot", 
+      "TokenizedBallot",
       TOKENIZED_BALLOT_ADDRESS as `0x${string}`
     );
     
     console.log(`TokenizedBallot contract address: ${ballotContract.address}`);
-    console.log(`Voter address: ${voter.account.address}`);
+    console.log(`Voter address: ${deployer.account.address}`);
     console.log(`Proposal ID: ${PROPOSAL_ID}`);
     console.log(`Vote amount: ${VOTE_AMOUNT}`);
 
@@ -37,15 +50,6 @@ async function main() {
     // Get the target block number
     const targetBlockNumber = await ballotContract.read.targetBlockNumber();
     console.log(`Target block number: ${targetBlockNumber}`);
-    
-    // Check remaining voting power
-    const votePower = await ballotContract.read.getRemainingVotingPower([voter.account.address]);
-    console.log(`Remaining voting power: ${votePower}`);
-    
-    if (votePower < VOTE_AMOUNT) {
-      console.error(`Error: Not enough voting power. Required: ${VOTE_AMOUNT}, Available: ${votePower}`);
-      process.exit(1);
-    }
 
     // Get proposal information before voting
     const proposalBefore = await ballotContract.read.proposals([BigInt(PROPOSAL_ID)]);
@@ -54,7 +58,7 @@ async function main() {
     // Cast vote
     const voteTx = await ballotContract.write.vote(
       [BigInt(PROPOSAL_ID), VOTE_AMOUNT],
-      { account: voter.account }
+      { account: deployer.account }
     );
     console.log(`Vote transaction hash: ${voteTx}`);
     
@@ -67,7 +71,7 @@ async function main() {
     console.log(`Proposal ${PROPOSAL_ID} vote count after: ${proposalAfter[1]}`);
     
     // Check remaining voting power after voting
-    const votePowerAfter = await ballotContract.read.getRemainingVotingPower([voter.account.address]);
+    const votePowerAfter = await ballotContract.read.getRemainingVotingPower([deployer.account.address]);
     console.log(`Remaining voting power after voting: ${votePowerAfter}`);
   } catch (error: unknown) {
     console.error("Error casting vote:");
