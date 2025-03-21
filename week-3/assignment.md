@@ -247,3 +247,53 @@ MethodID: 0xb384abef
 [0]:  0000000000000000000000000000000000000000000000000000000000000002
 [1]:  0000000000000000000000000000000000000000000000000000000000000008
 ```
+
+```shell
+❯ npx hardhat run scripts/CastVote.ts --network sepolia
+Casting vote...
+TokenizedBallot contract address: 0x958192c1479731d3b3c554510c4cc1398628aafb
+Voter address: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+Proposal ID: 1
+Vote amount: 1
+Token contract address: 0xEe30BaA4275D5EFbE6418cAc7DD1Cd1f43810c8E
+Target block number: 7952763
+Proposal 1 vote count before: 1
+Vote transaction hash: 0xc52f6e8d2ce6b7f9449787e4790cced518aa61c2ec74bb62e633c3dcef13631d
+Transaction confirmed in block 7952821
+Proposal 1 vote count after: 2
+Remaining voting power after voting: 80
+```
+
+- Transaction details (hash: [0xc52f6e8d2ce6b7f9449787e4790cced518aa61c2ec74bb62e633c3dcef13631d](https://sepolia.etherscan.io/tx/0xc52f6e8d2ce6b7f9449787e4790cced518aa61c2ec74bb62e633c3dcef13631d)) :
+
+```markdown
+Function: vote(uint256 proposal,uint256 amount) ***
+
+MethodID: 0xb384abef
+[0]:  0000000000000000000000000000000000000000000000000000000000000001
+[1]:  0000000000000000000000000000000000000000000000000000000000000001
+```
+
+Checking voting power after vote casting :
+
+```shell
+❯ npx hardhat run scripts/CheckVotingPower.ts --network sepolia                                                                  ─╯
+Checking voting power...
+Token contract address: 0xee30baa4275d5efbe6418cac7dd1cd1f43810c8e
+Ballot contract address: 0x958192c1479731d3b3c554510c4cc1398628aafb
+Voter address: 0x8790f7d137040D6Dad7A0AEAEe994CFD76577B23
+Current block number: 7952827
+Ballot target block number: 7952763
+Token balance: 100
+Current voting power: 100
+Voting power at target block 7952763: 100
+Remaining voting power in ballot: 80
+Vote power spent: 20
+
+Voting power details:
+- Total token balance: 100
+- Current active voting power: 100
+- Voting power at target block: 100
+- Power spent in ballot: 20
+- Remaining power for ballot: 80
+```

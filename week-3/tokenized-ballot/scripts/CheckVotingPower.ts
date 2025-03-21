@@ -1,17 +1,29 @@
 import { viem } from "hardhat";
+import { createPublicClient, http, createWalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { sepolia } from "viem/chains";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const MY_TOKEN_ADDRESS = process.env.TOKEN_CONTRACT_ADDRESS ?? "";
-const TOKENIZED_BALLOT_ADDRESS = process.env.TOKENIZED_BALLOT_ADDRESS ?? "";
-const VOTER_ADDRESS = process.env.VOTER_ADDRESS ?? "";
+const deployerPrivateKey = process.env.PRIVATE_KEY ?? "";
+const providerApiKey = process.env.ALCHEMY_API_KEY ?? "";
+const TOKENIZED_BALLOT_ADDRESS = "0x958192c1479731d3b3c554510c4cc1398628aafb";
+const MY_TOKEN_ADDRESS = "0xee30baa4275d5efbe6418cac7dd1cd1f43810c8e";
 
 async function main() {
   console.log("Checking voting power...");
 
   // Get the public client and wallet clients
-  const publicClient = await viem.getPublicClient();
-  const [deployer] = await viem.getWalletClients();
+  const publicClient = createPublicClient({
+      chain: sepolia,
+      transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
+  });
+  const account = privateKeyToAccount(`0x${deployerPrivateKey}`);
+  const deployer = createWalletClient({
+      account,
+      chain: sepolia,
+      transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
+  });
   
   // Check we have the required addresses
   if (!MY_TOKEN_ADDRESS) {
@@ -23,7 +35,7 @@ async function main() {
   }
   
   // Set voter address (either from env or use deployer)
-  const voterAddress = VOTER_ADDRESS || deployer.account.address;
+  const voterAddress = deployer.account.address;
 
   try {
     // Get the MyToken contract instance
@@ -31,7 +43,7 @@ async function main() {
     
     // Get the TokenizedBallot contract instance
     const ballotContract = await viem.getContractAt(
-      "TokenizedBallot", 
+      "TokenizedBallot",
       TOKENIZED_BALLOT_ADDRESS as `0x${string}`
     );
     
@@ -48,23 +60,23 @@ async function main() {
     console.log(`Ballot target block number: ${targetBlockNumber}`);
     
     // Check token balance
-    const balance = await tokenContract.read.balanceOf([voterAddress as `0x${string}`]);
+    const balance = await tokenContract.read.balanceOf([voterAddress]);
     console.log(`Token balance: ${balance}`);
     
     // Check current voting power
-    const currentVotes = await tokenContract.read.getVotes([voterAddress as `0x${string}`]);
+    const currentVotes = await tokenContract.read.getVotes([voterAddress]);
     console.log(`Current voting power: ${currentVotes}`);
     
     // Check past voting power at target block
-    const pastVotes = await tokenContract.read.getPastVotes([voterAddress as `0x${string}`, targetBlockNumber]);
+    const pastVotes = await tokenContract.read.getPastVotes([voterAddress, targetBlockNumber]);
     console.log(`Voting power at target block ${targetBlockNumber}: ${pastVotes}`);
     
     // Check remaining voting power in the ballot
-    const remainingVotingPower = await ballotContract.read.getRemainingVotingPower([voterAddress as `0x${string}`]);
+    const remainingVotingPower = await ballotContract.read.getRemainingVotingPower([voterAddress]);
     console.log(`Remaining voting power in ballot: ${remainingVotingPower}`);
     
     // Check vote power spent
-    const votePowerSpent = await ballotContract.read.votePowerSpent([voterAddress as `0x${string}`]);
+    const votePowerSpent = await ballotContract.read.votePowerSpent([voterAddress]);
     console.log(`Vote power spent: ${votePowerSpent}`);
     
     console.log("\nVoting power details:");
