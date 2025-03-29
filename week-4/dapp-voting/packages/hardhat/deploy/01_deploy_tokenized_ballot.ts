@@ -1,5 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { stringToHex } from "viem";
+import { getAddress } from "ethers";
 
 /**
  * Deploys a contract named "TokenizedBallot" using the deployer account and
@@ -21,15 +23,28 @@ const deployTokenizedBallot: DeployFunction = async function (hre: HardhatRuntim
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("TokenizedBallot", {
+  const MyToken = hre.deployments.get("MyToken");
+  const proposals = ["Proposal 1", "Proposal 2", "Proposal 3"];
+  const proposalsWithByte32 = proposals.map(str => stringToHex(str, { size: 32 }));
+  const publicClient = await hre.viem.getPublicClient();
+  const currentBlock = (await publicClient.getBlock()).number;
+
+  const targetBlockNumber = currentBlock - 1n;
+
+  const result = await deploy("TokenizedBallot", {
     from: deployer,
     // Contract constructor arguments
-    args: [deployer],
+    args: [proposalsWithByte32, (await MyToken).address, targetBlockNumber],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
     autoMine: true,
   });
+
+  // Get the deployed contract to interact with it after deploying.
+
+  const yourContract = await hre.viem.getContractAt("TokenizedBallot", result.address);
+  console.log("👋 VotingPower:", await yourContract.read.getRemainingVotingPower([getAddress(deployer)]));
 };
 
 export default deployTokenizedBallot;
@@ -37,3 +52,4 @@ export default deployTokenizedBallot;
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags YourContract
 deployTokenizedBallot.tags = ["TokenizedBallot"];
+deployTokenizedBallot.dependencies = ["MyToken"];

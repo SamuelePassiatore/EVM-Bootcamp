@@ -2,6 +2,11 @@ name: Lint
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - week-4/dapp-voting/
 
 jobs:
   ci:
@@ -26,9 +31,9 @@ jobs:
         run: yarn install --immutable
         working-directory: week-4/dapp-voting/
 
-      # - name: Run hardhat node, deploy contracts (& generate contracts typescript output)
-      #   run: yarn chain & yarn deploy
-      #   working-directory: week-4/dapp-voting/
+      - name: Run hardhat node, deploy contracts (& generate contracts typescript output)
+        run: yarn chain & yarn deploy
+        working-directory: week-4/dapp-voting/
 
       - name: Run hardhat lint
         run: yarn hardhat:lint --max-warnings=0

@@ -21,15 +21,18 @@ const deployMyToken: DeployFunction = async function (hre: HardhatRuntimeEnviron
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("MyToken", {
+  const result = await deploy("MyToken", {
     from: deployer,
     // Contract constructor arguments
-    args: [deployer],
+    args: [],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
     autoMine: true,
   });
+
+  const yourContract = await hre.viem.getContractAt("MyToken", result.address);
+  console.log("👋 TotalSupply:", await yourContract.read.totalSupply());
 };
 
 export default deployMyToken;
