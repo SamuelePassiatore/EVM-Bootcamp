@@ -30,16 +30,19 @@ yarn install
 
 * Import your `.env` file in the root of the project
 
+**Be sure to have the following environment variables:**
+
+```env
+NEXT_PUBLIC_TOKEN_ADDRESS="0xEe30BaA4275D5EFbE6418cAc7DD1Cd1f43810c8E"
+NEXT_PUBLIC_BALLOT_ADDRESS="0x958192c1479731d3b3c554510c4cc1398628aafb"
+```
+
+Thoses are the already deployed `MyToken.sol` and `TokenizedBallot.sol` contracts addresses (used for last weekend project).
+
 ## Utils commands
 
 * Import account from private key for default use in project:
 
 ```shell
 yarn account:import
-```
-
-* Deploy smart contracts to sepolia testnet:
-
-```shell
-yarn deploy [contract-tag] --network sepolia
 ```

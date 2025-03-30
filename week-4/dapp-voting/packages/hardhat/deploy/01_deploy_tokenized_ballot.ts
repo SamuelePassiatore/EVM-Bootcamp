@@ -43,7 +43,7 @@ const deployTokenizedBallot: DeployFunction = async function (hre: HardhatRuntim
 
   // Get the deployed contract to interact with it after deploying.
 
-  const yourContract = await hre.viem.getContractAt("TokenizedBallot", result.address);
+  const yourContract = await hre.viem.getContractAt("TokenizedBallot", result.address as `0x${string}`);
   console.log("👋 VotingPower:", await yourContract.read.getRemainingVotingPower([getAddress(deployer)]));
 };
 

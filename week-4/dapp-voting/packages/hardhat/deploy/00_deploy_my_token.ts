@@ -31,7 +31,7 @@ const deployMyToken: DeployFunction = async function (hre: HardhatRuntimeEnviron
     autoMine: true,
   });
 
-  const yourContract = await hre.viem.getContractAt("MyToken", result.address);
+  const yourContract = await hre.viem.getContractAt("MyToken", result.address as `0x${string}`);
   console.log("👋 TotalSupply:", await yourContract.read.totalSupply());
 };
 

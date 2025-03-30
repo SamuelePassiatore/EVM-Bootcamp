@@ -1,19 +1,19 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { MintTokenDto } from './mintToken.dto';
 
+@ApiTags('TokenizedBallot')
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
   @Post('/mint')
-  Mint(@Body() mintTokenDto: MintTokenDto) {
-    const { account, amount } = mintTokenDto;
-    return this.appService.Mint(account, amount);
+  @ApiOperation({ summary: 'Mint voting tokens to a wallet address' })
+  @ApiResponse({ status: 201, description: 'Tokens minted successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  mint(@Body() mintTokenDto: MintTokenDto) {
+    return this.appService.Mint(mintTokenDto.account, mintTokenDto.amount);
   }
 }
