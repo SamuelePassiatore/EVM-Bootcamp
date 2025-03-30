@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import {
   createPublicClient,
   createWalletClient,
+  getAddress,
   getContract,
   http,
   PublicClient,
-  stringToHex,
   WalletClient,
 } from 'viem';
 import { hardhat } from 'viem/chains';
@@ -28,16 +28,27 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
-  async Mint(address: string, amount: number) {
+  async Mint(account: string, amount: number) {
     if (!process.env.TOKEN_ADDRESS) {
       throw Error('missing TOKEN_ADDRESS in .env');
     }
-    const contract = getContract({
-      address: stringToHex(process.env.TOKEN_ADDRESS),
-      abi: tokenJson,
-      client: { public: this.publicClient, wallet: this.walletClient },
+
+    const accountAddr = getAddress(account);
+
+    const tx = await this.walletClient.writeContract({
+      address: getAddress(process.env.TOKEN_ADDRESS),
+      abi: tokenJson.abi,
+      functionName: 'mint',
+      args: [accountAddr, amount],
+      account: accountAddr,
+      chain: hardhat,
+    });
+    const transaction = await this.publicClient.waitForTransactionReceipt({
+      hash: tx,
     });
 
-    const result = await contract.write.mint([address, amount]);
+    console.log(transaction);
+
+    return tx;
   }
 }

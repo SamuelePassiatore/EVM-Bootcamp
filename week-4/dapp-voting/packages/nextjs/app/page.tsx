@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+import { Address, Balance } from "~~/components/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
+
+  if (!process.env.NEXT_PUBLIC_TOKEN_ADDRESS) {
+    throw new Error("missing NEXT_PUBLIC_TOKEN_ADDRESS");
+  }
 
   return (
     <>
@@ -20,6 +24,7 @@ const Home: NextPage = () => {
           <div className="flex justify-center items-center space-x-2 flex-col">
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
+            <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
           </div>
 
           <p className="text-center text-lg">

@@ -8,14 +8,16 @@ import { useGlobalState } from "~~/services/store/store";
 
 type BalanceProps = {
   address?: Address;
+  token?: Address;
   className?: string;
   usdMode?: boolean;
+  useEtherFormat?: boolean;
 };
 
 /**
  * Display (ETH & USD) balance of an ETH address.
  */
-export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
+export const Balance = ({ address, useEtherFormat, token, className = "", usdMode }: BalanceProps) => {
   const { targetNetwork } = useTargetNetwork();
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const isNativeCurrencyPriceFetching = useGlobalState(state => state.nativeCurrency.isFetching);
@@ -26,6 +28,7 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
     isLoading,
   } = useWatchBalance({
     address,
+    token,
   });
 
   const { displayUsdMode, toggleDisplayUsdMode } = useDisplayUsdMode({ defaultUsdMode: usdMode });
@@ -49,7 +52,8 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
     );
   }
 
-  const formattedBalance = balance ? Number(formatEther(balance.value)) : 0;
+  const balanceValue = balance?.value ?? 0n;
+  const formattedBalance = useEtherFormat ? Number(formatEther(balanceValue)) : Number(balanceValue);
 
   return (
     <button
@@ -66,7 +70,6 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
         ) : (
           <>
             <span>{formattedBalance.toFixed(4)}</span>
-            <span className="text-[0.8em] font-bold ml-1">{targetNetwork.nativeCurrency.symbol}</span>
           </>
         )}
       </div>
