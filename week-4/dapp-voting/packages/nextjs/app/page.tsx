@@ -1,10 +1,46 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount, useBalance } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address, Balance } from "~~/components/scaffold-eth";
+
+function RequestTokens(params: { address: string }) {
+  const [data, setData] = useState<{ result: boolean }>();
+  const [isLoading, setLoading] = useState(false);
+  const body = { address: params.address };
+  
+  if (isLoading) return <p>Requesting tokens from API...</p>;
+  if (!data)
+    return (
+      <button
+        className="btn btn-active btn-neutral"
+        onClick={() => {
+          setLoading(true);
+          fetch("http://localhost:3001/mint", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              setData(data);
+              setLoading(false);
+            });
+        }}
+      >
+        Request tokens
+      </button>
+    );
+  
+  return (
+    <div>
+      <p>Result from API: {data.result ? "worked" : "failed"}</p>
+    </div>
+  );
+}
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -25,6 +61,13 @@ const Home: NextPage = () => {
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
             <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
+            
+            {/* Component for requesting tokens */}
+            {connectedAddress && (
+              <div className="mt-2">
+                <RequestTokens address={connectedAddress} />
+              </div>
+            )}
           </div>
 
           <p className="text-center text-lg">
