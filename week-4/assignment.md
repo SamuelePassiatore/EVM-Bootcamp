@@ -22,7 +22,7 @@ This is a group activity for at least 3 students:
 ## Start working on the `dapp-voting` project
 
 * Pull the latest change from our github repo
-* Initiate your local workspace with :
+* Initiate your local workspace within the just clone `dapp-voting` directory root with :
 
 ```shell
 yarn install
@@ -33,11 +33,30 @@ yarn install
 **Be sure to have the following environment variables:**
 
 ```env
-NEXT_PUBLIC_TOKEN_ADDRESS="0xEe30BaA4275D5EFbE6418cAc7DD1Cd1f43810c8E"
-NEXT_PUBLIC_BALLOT_ADDRESS="0x958192c1479731d3b3c554510c4cc1398628aafb"
+[MyTokenAddress-var-name]="0x426cC3aB245a17425901DF2B710c215d8EF955c5"
+[TokenizedBallotAddress-var-name]="0xac4ADCe0CaB2E4044f445B3C782D63bf1b514bd9"
 ```
 
-Thoses are the already deployed `MyToken.sol` and `TokenizedBallot.sol` contracts addresses (used for last weekend project).
+Thoses are the already deployed `MyToken.sol` and `TokenizedBallot.sol` contracts addresses on Sepolia.
+
+* Start both frontend and backend services:
+
+Run NestJS backend:
+
+```shell
+cd packages/nestjs
+yarn start:dev
+```
+
+Run NextJS frontend:
+
+```shell
+cd packages/nextjs
+yarn dev
+```
+
+* Open your browser and go to `http://localhost:3000/` to see the frontend
+* Open your browser and go to `http://localhost:3001/api` to see the backend swagger interface
 
 ## Utils commands
 

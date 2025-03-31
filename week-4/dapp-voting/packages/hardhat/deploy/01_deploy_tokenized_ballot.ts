@@ -24,7 +24,7 @@ const deployTokenizedBallot: DeployFunction = async function (hre: HardhatRuntim
   const { deploy } = hre.deployments;
 
   const MyToken = hre.deployments.get("MyToken");
-  const proposals = ["Proposal 1", "Proposal 2", "Proposal 3"];
+  const proposals = ["prop-1", "prop-2", "prop-3"];
   const proposalsWithByte32 = proposals.map(str => stringToHex(str, { size: 32 }));
   const publicClient = await hre.viem.getPublicClient();
   const currentBlock = (await publicClient.getBlock()).number;

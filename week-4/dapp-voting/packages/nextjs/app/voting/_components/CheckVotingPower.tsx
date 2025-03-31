@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 export const CheckVotingPower = () => {
+    
     const { address } = useAccount();
     const [isLoading, setIsLoading] = useState(true);
     const [votingPower, setVotingPower] = useState({
@@ -15,19 +16,19 @@ export const CheckVotingPower = () => {
         remainingVotes: "0",
         spentVotes: "0"
     });
-
+    
     const { data: tokenBalance } = useScaffoldReadContract({
         contractName: "MyToken",
         functionName: "balanceOf",
         args: [address!],
-        enabled: !!address,
+        query: { enabled: !!address },
     });
 
     const { data: currentVotes } = useScaffoldReadContract({
         contractName: "MyToken",
         functionName: "getVotes",
         args: [address!],
-        enabled: !!address,
+        query: { enabled: !!address },
     });
 
     const { data: targetBlockNumber } = useScaffoldReadContract({
@@ -39,37 +40,79 @@ export const CheckVotingPower = () => {
         contractName: "MyToken",
         functionName: "getPastVotes",
         args: [address!, targetBlockNumber || 0n],
-        enabled: !!address && !!targetBlockNumber,
+        query: { enabled: !!address && !!targetBlockNumber },
     });
 
     const { data: remainingVotes } = useScaffoldReadContract({
         contractName: "TokenizedBallot",
         functionName: "getRemainingVotingPower",
         args: [address!],
-        enabled: !!address,
+        query: { enabled: !!address },
     });
-
+    
     const { data: votePowerSpent } = useScaffoldReadContract({
         contractName: "TokenizedBallot",
         functionName: "votePowerSpent",
         args: [address!],
-        enabled: !!address,
+        query: { enabled: !!address },
     });
-
+    
     useEffect(() => {
-        if (tokenBalance !== undefined && currentVotes !== undefined && 
-            pastVotes !== undefined && remainingVotes !== undefined && 
-            votePowerSpent !== undefined) {
-        setVotingPower({
-            balance: formatEther(tokenBalance),
-            currentVotes: formatEther(currentVotes),
-            pastVotes: formatEther(pastVotes),
-            remainingVotes: formatEther(remainingVotes),
-            spentVotes: formatEther(votePowerSpent)
+        if (tokenBalance !== undefined) {
+            setVotingPower(prev => ({
+                ...prev,
+                balance: formatEther(tokenBalance)
+            }));
+        }
+
+        if (currentVotes !== undefined) {
+            setVotingPower(prev => ({
+                ...prev,
+                currentVotes: formatEther(currentVotes)
+            }));
+        }
+
+        if (pastVotes !== undefined) {
+            setVotingPower(prev => ({
+                ...prev,
+                pastVotes: formatEther(pastVotes),
+            }));
+        }
+
+        if (remainingVotes !== undefined) {
+            setVotingPower(prev => ({
+                ...prev,
+                remainingVotes: formatEther(remainingVotes),
+            }));
+        }
+
+        if (votePowerSpent !== undefined) {
+            setVotingPower(prev => ({
+                ...prev,
+                spentVotes: formatEther(votePowerSpent),
+            }));
+        }
+
+        console.log({
+            tokenBalance,
+            currentVotes,
+            pastVotes,
+            remainingVotes,
+            votePowerSpent,
+            targetBlockNumber
         });
-        setIsLoading(false);
+
+        if (tokenBalance !== undefined || currentVotes !== undefined ||
+            pastVotes !== undefined || remainingVotes !== undefined ||
+            votePowerSpent !== undefined) {
+            setIsLoading(false);
         }
     }, [tokenBalance, currentVotes, pastVotes, remainingVotes, votePowerSpent]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 10000);
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (targetBlockNumber) {

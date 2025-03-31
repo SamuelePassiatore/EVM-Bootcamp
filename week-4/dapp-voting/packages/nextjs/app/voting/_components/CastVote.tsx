@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { parseEther } from "viem";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -19,19 +18,19 @@ export const CastVote = () => {
         
         setIsLoading(true);
         try {
-        const tx = await writeContractAsync({
-            functionName: "vote",
-            args: [BigInt(proposalId), parseEther(voteAmount)],
-        });
-        
-        notification.success(`Vote cast successfully! Transaction: ${tx}`);
-        setProposalId("0");
-        setVoteAmount("1");
+            const tx = await writeContractAsync({
+                functionName: "vote",
+                args: [BigInt(proposalId), BigInt(voteAmount)],
+            });
+            
+            notification.success(`Vote cast successfully! Transaction: ${tx}`);
+            setProposalId("0");
+            setVoteAmount("1");
         } catch (error) {
-        console.error("Error casting vote:", error);
-        notification.error(`Failed to cast vote: ${(error as Error).message}`);
+            console.error("Error casting vote:", error);
+            notification.error(`Failed to cast vote: ${(error as Error).message}`);
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -62,7 +61,7 @@ export const CastVote = () => {
                 className="input input-bordered"
             />
             </div>
-            <button 
+            <button
             className="btn btn-primary"
             onClick={handleVote}
             disabled={isLoading}

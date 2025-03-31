@@ -8,12 +8,12 @@ import { MintTokenDto } from './mintToken.dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('/mint')
+  @Post('mint')
   @ApiOperation({ summary: 'Mint voting tokens to a wallet address' })
   @ApiResponse({ status: 201, description: 'Tokens minted successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  mint(@Body() mintTokenDto: MintTokenDto) {
-    return this.appService.Mint(mintTokenDto.account, mintTokenDto.amount);
+  async mint(@Body() mintTokenDto: MintTokenDto) {
+    return {result: await this.appService.mintTokens(mintTokenDto.account, mintTokenDto.amount)};
   }
 }
