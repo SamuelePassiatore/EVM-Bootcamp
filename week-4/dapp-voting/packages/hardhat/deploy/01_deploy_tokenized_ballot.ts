@@ -29,7 +29,7 @@ const deployTokenizedBallot: DeployFunction = async function (hre: HardhatRuntim
   const publicClient = await hre.viem.getPublicClient();
   const currentBlock = (await publicClient.getBlock()).number;
 
-  const targetBlockNumber = currentBlock - 1n;
+  const targetBlockNumber = currentBlock - 10n;
 
   const result = await deploy("TokenizedBallot", {
     from: deployer,

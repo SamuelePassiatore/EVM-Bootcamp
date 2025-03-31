@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { CastVote } from "./_components/CastVote";
 import { CheckVotingPower } from "./_components/CheckVotingPower";
+import { RedeployBallot } from "./_components/RedeployBallot";
 import { DelegateVote } from "./_components/DelegateVote";
 import { QueryResults } from "./_components/QueryResults";
 import { MintTokens } from "./_components/MintTokens";
@@ -26,9 +27,10 @@ const VotingPage = () => {
             </div>
         </div>
 
-        {/* Add CheckVotingPower component */}
-        <div className="w-full max-w-lg mb-8">
-            <CheckVotingPower />
+        {/* Add Voting Power components */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full max-w-lg mb-8">
+                <CheckVotingPower />
+                <RedeployBallot />
         </div>
 
         {/* Action components */}

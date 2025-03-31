@@ -6,6 +6,25 @@ import { AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
+export const voteEvents: {
+    listeners: Record<string, Array<() => void>>,
+    on: (event: string, callback: () => void) => void,
+    emit: (event: string) => void
+} = {
+    listeners: {},
+    on(event: string, callback: () => void) {
+        if (!this.listeners[event]) {
+        this.listeners[event] = [];
+        }
+        this.listeners[event].push(callback);
+    },
+    emit(event: string) {
+        if (this.listeners[event]) {
+        this.listeners[event].forEach((callback: () => void) => callback());
+        }
+    }
+};
+
 export const DelegateVote = () => {
     const [delegateAddress, setDelegateAddress] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
@@ -16,21 +35,20 @@ export const DelegateVote = () => {
 
     const handleDelegate = async () => {
         if (!delegateAddress || !isAddress(delegateAddress)) return;
-        
         setIsLoading(true);
         try {
-        const tx = await writeContractAsync({
-            functionName: "delegate",
-            args: [delegateAddress],
-        });
-        
-        notification.success(`Successfully delegated votes! Transaction: ${tx}`);
-        setDelegateAddress("");
+            const tx = await writeContractAsync({
+                functionName: "delegate",
+                args: [delegateAddress],
+            });
+            notification.success(`Successfully delegated votes! Transaction: ${tx}`);
+            setDelegateAddress("");
+            voteEvents.emit('delegationCompleted');
         } catch (error) {
-        console.error("Error delegating votes:", error);
-        notification.error(`Failed to delegate: ${(error as Error).message}`);
+            console.error("Error delegating votes:", error);
+            notification.error(`Failed to delegate: ${(error as Error).message}`);
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     };
 

@@ -1,9 +1,8 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { voteEvents } from "./DelegateVote";
 
 export const CheckVotingPower = () => {
     
@@ -17,14 +16,14 @@ export const CheckVotingPower = () => {
         spentVotes: "0"
     });
     
-    const { data: tokenBalance } = useScaffoldReadContract({
+    const { data: tokenBalance, refetch: refetchBalance } = useScaffoldReadContract({
         contractName: "MyToken",
         functionName: "balanceOf",
         args: [address!],
         query: { enabled: !!address },
     });
 
-    const { data: currentVotes } = useScaffoldReadContract({
+    const { data: currentVotes, refetch: refetchCurrentVotes } = useScaffoldReadContract({
         contractName: "MyToken",
         functionName: "getVotes",
         args: [address!],
@@ -39,68 +38,83 @@ export const CheckVotingPower = () => {
     const { data: pastVotes, refetch: refetchPastVotes } = useScaffoldReadContract({
         contractName: "MyToken",
         functionName: "getPastVotes",
-        args: [address!, targetBlockNumber || 0n],
+        args: [address!, targetBlockNumber ?? 0n],
         query: { enabled: !!address && !!targetBlockNumber },
     });
 
-    const { data: remainingVotes } = useScaffoldReadContract({
+    const { data: remainingVotes, refetch: refetchRemainingVotes } = useScaffoldReadContract({
         contractName: "TokenizedBallot",
         functionName: "getRemainingVotingPower",
         args: [address!],
         query: { enabled: !!address },
     });
     
-    const { data: votePowerSpent } = useScaffoldReadContract({
+    const { data: votePowerSpent, refetch: refetchVotePowerSpent } = useScaffoldReadContract({
         contractName: "TokenizedBallot",
         functionName: "votePowerSpent",
         args: [address!],
         query: { enabled: !!address },
     });
     
+    // Function to refresh all data
+    const refreshData = async () => {
+        setIsLoading(true);
+        try {
+            await Promise.all([
+                refetchBalance(),
+                refetchCurrentVotes(),
+                refetchPastVotes(),
+                refetchRemainingVotes(),
+                refetchVotePowerSpent()
+            ]);
+        } catch (error) {
+            console.error("Error refreshing data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (targetBlockNumber) {
+            refetchPastVotes();
+        }
+    }, [targetBlockNumber, refetchPastVotes]);
+    
     useEffect(() => {
         if (tokenBalance !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                balance: formatEther(tokenBalance)
+                balance: Number(formatEther(tokenBalance)).toString()
             }));
         }
 
         if (currentVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                currentVotes: formatEther(currentVotes)
+                currentVotes: Number(formatEther(currentVotes)).toString()
             }));
         }
 
         if (pastVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                pastVotes: formatEther(pastVotes),
+                pastVotes: Number(formatEther(pastVotes)).toString(),
             }));
         }
 
         if (remainingVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                remainingVotes: formatEther(remainingVotes),
+                remainingVotes: Number(formatEther(remainingVotes)).toString(),
             }));
         }
 
         if (votePowerSpent !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                spentVotes: formatEther(votePowerSpent),
+                spentVotes: Number(formatEther(votePowerSpent)).toString(),
             }));
         }
-
-        console.log({
-            tokenBalance,
-            currentVotes,
-            pastVotes,
-            remainingVotes,
-            votePowerSpent,
-            targetBlockNumber
-        });
 
         if (tokenBalance !== undefined || currentVotes !== undefined ||
             pastVotes !== undefined || remainingVotes !== undefined ||
@@ -115,43 +129,67 @@ export const CheckVotingPower = () => {
     }, []);
 
     useEffect(() => {
-        if (targetBlockNumber) {
-        refetchPastVotes();
-        }
-    }, [targetBlockNumber, refetchPastVotes]);
+        const handleDelegationCompleted = () => {
+            refreshData();
+        };
+        
+        voteEvents.on('delegationCompleted', handleDelegationCompleted);
+        
+        return () => {
+            voteEvents.listeners['delegationCompleted'] =
+                voteEvents.listeners['delegationCompleted']?.filter(
+                    listener => listener !== handleDelegationCompleted
+                );
+        };
+    }, []);
 
     return (
         <div className="bg-base-100 shadow-md rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Your Voting Power</h2>
-        
-        {isLoading ? (
-            <div className="flex justify-center">
-            <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        ) : (
-            <div className="space-y-2">
-            <div className="flex justify-between">
-                <span>Token Balance:</span>
-                <span className="font-medium">{votingPower.balance} MTK</span>
-            </div>
-            <div className="flex justify-between">
-                <span>Current Voting Power:</span>
-                <span className="font-medium">{votingPower.currentVotes} votes</span>
-            </div>
-            <div className="flex justify-between">
-                <span>Voting Power at Target Block:</span>
-                <span className="font-medium">{votingPower.pastVotes} votes</span>
-            </div>
-            <div className="flex justify-between">
-                <span>Remaining Voting Power:</span>
-                <span className="font-medium">{votingPower.remainingVotes} votes</span>
-            </div>
-            <div className="flex justify-between">
-                <span>Votes Already Cast:</span>
-                <span className="font-medium">{votingPower.spentVotes} votes</span>
-            </div>
-            </div>
-        )}
+            <h2 className="text-xl font-semibold mb-4">Your Voting Power</h2>
+            
+            {isLoading ? (
+                <div className="flex justify-center">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            ) : (
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span>Token Balance:</span>
+                        <span className="font-medium">{votingPower.balance} MTK</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Current Voting Power:</span>
+                        <span className="font-medium">{votingPower.currentVotes} votes</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Voting Power at Target Block:</span>
+                        <span className="font-medium">{votingPower.pastVotes} votes</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Remaining Voting Power:</span>
+                        <span className="font-medium">{votingPower.remainingVotes} votes</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Votes Already Cast:</span>
+                        <span className="font-medium">{votingPower.spentVotes} votes</span>
+                    </div>
+                    
+                    {/* Add refresh button */}
+                    <div className="flex justify-end mt-4">
+                        <button
+                            className="btn btn-sm btn-primary" 
+                            onClick={refreshData}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                "Refresh Voting Power"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

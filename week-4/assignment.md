@@ -31,13 +31,31 @@ yarn install
 * Import your `.env` file in the root of the project
 
 **Be sure to have the following environment variables:**
+* `.env` or `.env.local` file in the `packages/nextjs` directory:
 
 ```env
-[MyTokenAddress-var-name]="0x426cC3aB245a17425901DF2B710c215d8EF955c5"
-[TokenizedBallotAddress-var-name]="0xac4ADCe0CaB2E4044f445B3C782D63bf1b514bd9"
+NEXT_PUBLIC_ALCHEMY_API_KEY=
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=
+NEXT_PUBLIC_TOKEN_ADDRESS="0x426cC3aB245a17425901DF2B710c215d8EF955c5" # Already deployed MyToken.sol contract address
 ```
 
-Thoses are the already deployed `MyToken.sol` and `TokenizedBallot.sol` contracts addresses on Sepolia.
+* `.env` or `.env.local` file in the `packages/nestjs` directory:
+
+```env
+TOKEN_ADDRESS="0x426cC3aB245a17425901DF2B710c215d8EF955c5" # Already deployed MyToken.sol contract address
+ALCHEMY_RPC_ENDPOINT_URL=
+DEPLOYER_PRIVATE_KEY=
+```
+
+* `.env` file in the `packages/hardhat` directory:
+
+```env
+ALCHEMY_API_KEY=
+ETHERSCAN_MAINNET_API_KEY=
+
+# Don't fill this value manually, run `yarn account:import` within the `dapp-voting/packages/hardhat` directory and follow the instructions to import an existing private key.
+DEPLOYER_PRIVATE_KEY_ENCRYPTED=
+```
 
 * Start both frontend and backend services:
 
