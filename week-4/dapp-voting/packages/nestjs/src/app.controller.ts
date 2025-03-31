@@ -16,4 +16,14 @@ export class AppController {
   async mint(@Body() mintTokenDto: MintTokenDto) {
     return {result: await this.appService.mintTokens(mintTokenDto.account, mintTokenDto.amount)};
   }
+
+  @Post('redeploy-ballot')
+  @ApiOperation({ summary: 'Redeploy TokenizedBallot contract to update voting power at target block' })
+  @ApiResponse({ status: 201, description: 'TokenizedBallot redeployed successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async redeployBallot() {
+    return {
+      newContractAddress: await this.appService.redeployBallot()
+    };
+  }
 }
