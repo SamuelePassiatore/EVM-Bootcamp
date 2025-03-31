@@ -177,7 +177,7 @@ export const CheckVotingPower = () => {
                     {/* Add refresh button */}
                     <div className="flex justify-end mt-4">
                         <button
-                            className="btn btn-sm btn-primary" 
+                            className="btn btn-sm btn-primary"
                             onClick={refreshData}
                             disabled={isLoading}
                         >

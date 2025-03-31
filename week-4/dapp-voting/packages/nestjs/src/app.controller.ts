@@ -14,7 +14,7 @@ export class AppController {
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async mint(@Body() mintTokenDto: MintTokenDto) {
-    return {result: await this.appService.mintTokens(mintTokenDto.account, mintTokenDto.amount)};
+    return {result: await this.appService.mintTokens(mintTokenDto.address, mintTokenDto.amount)};
   }
 
   @Post('redeploy-ballot')
