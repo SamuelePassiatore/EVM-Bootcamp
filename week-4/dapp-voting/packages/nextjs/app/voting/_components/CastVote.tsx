@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
+import { voteEvents } from "./DelegateVote";
 
 export const CastVote = () => {
     const [proposalId, setProposalId] = useState<string>("0");
@@ -15,17 +16,16 @@ export const CastVote = () => {
 
     const handleVote = async () => {
         if (!proposalId || !voteAmount) return;
-        
         setIsLoading(true);
         try {
             const tx = await writeContractAsync({
                 functionName: "vote",
                 args: [BigInt(proposalId), BigInt(voteAmount)],
             });
-            
             notification.success(`Vote cast successfully! Transaction: ${tx}`);
             setProposalId("0");
             setVoteAmount("1");
+            voteEvents.emit('voteCasted'); // Add this line
         } catch (error) {
             console.error("Error casting vote:", error);
             notification.error(`Failed to cast vote: ${(error as Error).message}`);
@@ -45,6 +45,7 @@ export const CastVote = () => {
             <input
                 type="number"
                 min="0"
+                max="2"
                 value={proposalId}
                 onChange={(e) => setProposalId(e.target.value)}
                 className="input input-bordered"

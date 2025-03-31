@@ -37,70 +37,82 @@ export const QueryResults = () => {
         return new TextDecoder().decode(buf).replace(/\0/g, '');
     };
 
-    // Function to fetch all proposals and their vote counts
-    const fetchProposals = async () => {
-        setIsLoading(true);
-        try {
-        const proposalsArray: ProposalResult[] = [];
-        let totalVotesCast = 0n;
-        
-        // Try to read proposals until we get an error (out of bounds)
-        for (let i = 0; ; i++) {
-            try {
-            const { data } = await refetchProposal({
-                args: [BigInt(i)],
-            });
-            
-            if (data) {
-                const [name, voteCount] = data as [string, bigint];
-                proposalsArray.push({
-                id: i,
-                name: bytes32ToString(name),
-                voteCount: formatEther(voteCount),
-                percentage: 0, // Will calculate after getting total
-                });
-                totalVotesCast += voteCount;
-            }
-            } catch (error) {
-            // We've reached the end of the proposals
-            break;
-            }
-        }
-        
-        // Calculate percentages
-        if (totalVotesCast > 0n) {
-            proposalsArray.forEach(proposal => {
-            const votesBigInt = BigInt(Math.floor(parseFloat(proposal.voteCount) * 1e18));
-            proposal.percentage = Number((votesBigInt * 10000n) / totalVotesCast) / 100;
-            });
-        }
-        
-        setTotalVotes(totalVotesCast);
-        setProposals(proposalsArray);
-        } catch (error) {
-        console.error("Error fetching proposals:", error);
-        } finally {
-        setIsLoading(false);
-        }
-    };
-
-    const { refetch: refetchProposal } = useScaffoldReadContract({
+    // We need separate hook calls for each proposal
+    const { data: proposal0, isLoading: isLoading0 } = useScaffoldReadContract({
         contractName: "TokenizedBallot",
         functionName: "proposals",
         args: [0n],
     });
 
+    const { data: proposal1, isLoading: isLoading1 } = useScaffoldReadContract({
+        contractName: "TokenizedBallot",
+        functionName: "proposals",
+        args: [1n],
+    });
+
+    const { data: proposal2, isLoading: isLoading2 } = useScaffoldReadContract({
+        contractName: "TokenizedBallot",
+        functionName: "proposals",
+        args: [2n],
+    });
+
+    // Process proposals after they're loaded
     useEffect(() => {
         if (winnerName) {
-        setWinningProposal(bytes32ToString(winnerName));
+            setWinningProposal(bytes32ToString(winnerName));
         }
         if (winningProposalId) {
-        setWinningId(winningProposalId.toString());
+            setWinningId(winningProposalId.toString());
         }
-    }, [winnerName, winningProposalId]);
 
+        // Wait for all proposal data to load
+        if (isLoading0 || isLoading1 || isLoading2) {
+            return;
+        }
+
+        // Process the proposals
+        try {
+            const proposalsArray: ProposalResult[] = [];
+            let totalVotesCast = 0n;
+
+            // Add each valid proposal to our array
+            const proposalData = [proposal0, proposal1, proposal2];
+            
+            for (let i = 0; i < proposalData.length; i++) {
+                const data = proposalData[i];
+                if (data) {
+                    const [name, voteCount] = data as [string, bigint];
+                    proposalsArray.push({
+                        id: i,
+                        name: bytes32ToString(name),
+                        voteCount: Number(voteCount).toString(),
+                        percentage: 0,
+                    });
+                    totalVotesCast += voteCount;
+                }
+            }
+
+            // Calculate percentages
+            if (totalVotesCast > 0n) {
+                proposalsArray.forEach(proposal => {
+                    const votesBigInt = BigInt(Math.floor(parseFloat(proposal.voteCount)));
+                    proposal.percentage = Number((votesBigInt * 10000n) / totalVotesCast) / 100;
+                });
+            }
+
+            setTotalVotes(totalVotesCast);
+            setProposals(proposalsArray);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error processing proposals:", error);
+            setIsLoading(false);
+        }
+    }, [proposal0, proposal1, proposal2, isLoading0, isLoading1, isLoading2, winnerName, winningProposalId]);
+
+    // Ensure loading state doesn't get stuck
     useEffect(() => {
-        fetchProposals();
+        const timer = setTimeout(() => setIsLoading(false), 10000);
+        return () => clearTimeout(timer);
     }, []);
 
     return (
@@ -148,7 +160,7 @@ export const QueryResults = () => {
             <div className="flex justify-end">
                 <button
                 className="btn btn-outline btn-sm"
-                onClick={fetchProposals}
+                onClick={() => window.location.reload()}
                 >
                 Refresh Results
                 </button>

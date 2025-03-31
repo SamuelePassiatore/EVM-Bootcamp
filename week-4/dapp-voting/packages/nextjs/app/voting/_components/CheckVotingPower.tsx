@@ -112,7 +112,7 @@ export const CheckVotingPower = () => {
         if (votePowerSpent !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                spentVotes: Number(formatEther(votePowerSpent)).toString(),
+                spentVotes: Number(votePowerSpent).toString(),
             }));
         }
 
@@ -132,13 +132,22 @@ export const CheckVotingPower = () => {
         const handleDelegationCompleted = () => {
             refreshData();
         };
-        
+
+        const handleVoteCasted = () => {
+            refreshData();
+        };
+
         voteEvents.on('delegationCompleted', handleDelegationCompleted);
+        voteEvents.on('voteCasted', handleVoteCasted);
         
         return () => {
             voteEvents.listeners['delegationCompleted'] =
                 voteEvents.listeners['delegationCompleted']?.filter(
                     listener => listener !== handleDelegationCompleted
+                );
+            voteEvents.listeners['voteCasted'] =
+                voteEvents.listeners['voteCasted']?.filter(
+                    listener => listener !== handleVoteCasted
                 );
         };
     }, []);

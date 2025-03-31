@@ -1174,7 +1174,7 @@ const deployedContracts = {
       },
     },
     TokenizedBallot: {
-      address: "0x486aa4b3e75a3930c0d42cfd977a63ce1d2fdf29",
+      address: "0x13f9aff49c33c0e18cb4167c039b580d0464f1b9",
       abi: [
         {
           inputs: [

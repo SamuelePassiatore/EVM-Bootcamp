@@ -31,6 +31,7 @@ yarn install
 * Import your `.env` file in the root of the project
 
 **Be sure to have the following environment variables:**
+
 * `.env` or `.env.local` file in the `packages/nextjs` directory:
 
 ```env
