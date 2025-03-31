@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { notification } from "~~/utils/scaffold-eth";
+import { voteEvents } from "./DelegateVote";
 
 export const MintTokens = () => {
     const { address } = useAccount();
@@ -10,8 +11,16 @@ export const MintTokens = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const mintTokens = async () => {
-        if (!address || !amount) return;
-        
+        if (!address) {
+            notification.error("Wallet not connected");
+            return;
+        }
+
+        if (!amount) {
+            notification.error("Please enter an amount");
+            return;
+        }
+
         setIsLoading(true);
         try {
             const response = await fetch("http://localhost:3001/mint", {
@@ -20,7 +29,7 @@ export const MintTokens = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    account: address,
+                    address: address,
                     amount: parseFloat(amount),
                 }),
             });
@@ -33,6 +42,7 @@ export const MintTokens = () => {
             const data = await response.json();
             notification.success(`Successfully minted tokens! Transaction: ${data}`);
             setAmount("10");
+            voteEvents.emit('tokensMinted');
         } catch (error) {
             console.error("Error minting tokens:", error);
             notification.error(`Failed to mint tokens: ${(error as Error).message}`);

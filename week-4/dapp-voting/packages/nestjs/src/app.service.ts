@@ -63,18 +63,16 @@ export class AppService {
       if (!tokenAddress) {
         throw new Error('TOKEN_ADDRESS is not defined in environment variables');
       }
-      
-      const amountInWei = BigInt(amount) * BigInt(10 ** 18);
-      
-      console.log(`Minting ${amountInWei} tokens to ${account}`);
+
+      console.log(`Minting ${amount} tokens to ${account}`);
       console.log(`Using token address: ${tokenAddress}`);
-      
+
       const accountAddr = getAddress(account);
       const tx = await this.walletClient.writeContract({
         address: getAddress(tokenAddress),
         abi: tokenJson.abi,
         functionName: 'mint',
-        args: [accountAddr, amountInWei],
+        args: [accountAddr, amount],
         account: this.account,
         // chain: hardhat,
         chain: sepolia,
@@ -103,19 +101,19 @@ export class AppService {
       if (!fs.existsSync(deployedContractsPath)) {
         throw new Error('deployedContracts.ts file not found');
       }
-      
+
       // Read the file content
       const fileContent = fs.readFileSync(deployedContractsPath, 'utf8');
-      
+
       // Extract TokenizedBallot address using regex
       // This is a bit hacky but avoids having to import and evaluate the TS file
       const regex = /TokenizedBallot\s*:\s*\{\s*address\s*:\s*"([^"]+)"/m;
       const match = fileContent.match(regex);
-      
+
       if (!match || !match[1]) {
         throw new Error('TokenizedBallot address not found in deployedContracts.ts');
       }
-      
+
       return match[1];
     } catch (error) {
       console.error('Error getting current ballot address:', error);
@@ -130,11 +128,11 @@ export class AppService {
       if (!tokenAddress) {
         throw new Error('TOKEN_ADDRESS is not defined in environment variables');
       }
-      
+
       // Get current ballot address dynamically
       const currentBallotAddress = await this.getCurrentBallotAddress();
       console.log(`Found current ballot at: ${currentBallotAddress}`);
-      
+
       // Read proposals from current ballot
       const proposals: `0x${string}`[] = [];
       try {
@@ -146,8 +144,8 @@ export class AppService {
             functionName: 'proposals',
             args: [BigInt(index)]
           }) as [bytes32: `0x${string}`, voteCount: bigint];
-          
-          proposals.push(proposal[0]); // Store just the name
+
+          proposals.push(proposal[0]);
           console.log(`Read proposal ${index}: ${proposal[0]}`);
           index++;
         }
@@ -155,16 +153,16 @@ export class AppService {
         // This error is expected when we've read all proposals
         console.log(`Found ${proposals.length} proposals`);
       }
-      
+
       if (proposals.length === 0) {
         throw new Error('No proposals found in the existing ballot contract');
       }
-      
+
       // Get current block and set target block slightly before it
       const block = await this.publicClient.getBlock();
       const targetBlockNumber = block.number - 10n;
       console.log(`Using target block number: ${targetBlockNumber}`);
-      
+
       // Deploy new contract
       console.log('Deploying new ballot contract...');
       const tx = await this.walletClient.deployContract({
@@ -174,14 +172,14 @@ export class AppService {
         account: this.account,
         chain: sepolia
       });
-      
+
       console.log(`Deployment transaction: ${tx}`);
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash: tx });
       const newContractAddress = receipt.contractAddress as `0x${string}`;
-      
+
       // Update the deployedContracts.ts file with the new address
       this.updateDeployedContractsFile(newContractAddress);
-      
+
       console.log(`TokenizedBallot redeployed to: ${newContractAddress}`);
       return newContractAddress;
     } catch (error) {
@@ -189,26 +187,26 @@ export class AppService {
       throw error;
     }
   }
-  
+
   /**
    * Update the deployedContracts.ts file with the new ballot address
    */
   private updateDeployedContractsFile(newAddress: string): void {
     try {
       const deployedContractsPath = path.resolve(__dirname, '../../nextjs/contracts/deployedContracts.ts');
-      
+
       if (!fs.existsSync(deployedContractsPath)) {
         console.warn('deployedContracts.ts file not found, cannot update');
         return;
       }
-      
+
       let fileContent = fs.readFileSync(deployedContractsPath, 'utf8');
-      
+
       // Replace the old address with the new one
       // This matches: TokenizedBallot: { (anything) address: "0x..." (and captures only the 0x part)
       const regex = /(TokenizedBallot\s*:\s*\{\s*address\s*:\s*")([^"]+)(")/m;
       fileContent = fileContent.replace(regex, `$1${newAddress}$3`);
-      
+
       fs.writeFileSync(deployedContractsPath, fileContent);
       console.log('Updated deployedContracts.ts with new address');
     } catch (error) {

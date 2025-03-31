@@ -14,13 +14,13 @@ export const voteEvents: {
     listeners: {},
     on(event: string, callback: () => void) {
         if (!this.listeners[event]) {
-        this.listeners[event] = [];
+            this.listeners[event] = [];
         }
         this.listeners[event].push(callback);
     },
     emit(event: string) {
         if (this.listeners[event]) {
-        this.listeners[event].forEach((callback: () => void) => callback());
+            this.listeners[event].forEach((callback: () => void) => callback());
         }
     }
 };
@@ -41,7 +41,7 @@ export const DelegateVote = () => {
                 functionName: "delegate",
                 args: [delegateAddress],
             });
-            notification.success(`Successfully delegated votes! Transaction: ${tx}`);
+            notification.success(`Successfully delegated votes to ${delegateAddress}! Transaction: ${tx}`);
             setDelegateAddress("");
             voteEvents.emit('delegationCompleted');
         } catch (error) {

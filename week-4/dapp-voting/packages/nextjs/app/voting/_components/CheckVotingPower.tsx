@@ -55,7 +55,13 @@ export const CheckVotingPower = () => {
         args: [address!],
         query: { enabled: !!address },
     });
-    
+
+    useEffect(() => {
+        if (address) {
+            refreshData();
+        }
+    }, [address]);
+
     // Function to refresh all data
     const refreshData = async () => {
         setIsLoading(true);
@@ -84,28 +90,28 @@ export const CheckVotingPower = () => {
         if (tokenBalance !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                balance: Number(formatEther(tokenBalance)).toString()
+                balance: Number(tokenBalance).toString(),
             }));
         }
 
         if (currentVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                currentVotes: Number(formatEther(currentVotes)).toString()
+                currentVotes: Number(currentVotes).toString(),
             }));
         }
 
         if (pastVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                pastVotes: Number(formatEther(pastVotes)).toString(),
+                pastVotes: Number(pastVotes).toString(),
             }));
         }
 
         if (remainingVotes !== undefined) {
             setVotingPower(prev => ({
                 ...prev,
-                remainingVotes: Number(formatEther(remainingVotes)).toString(),
+                remainingVotes: Number(remainingVotes).toString(),
             }));
         }
 
@@ -137,10 +143,16 @@ export const CheckVotingPower = () => {
             refreshData();
         };
 
+        const handleTokensMinted = () => {
+            refreshData();
+        };
+
         voteEvents.on('delegationCompleted', handleDelegationCompleted);
         voteEvents.on('voteCasted', handleVoteCasted);
-        
+        voteEvents.on('tokensMinted', handleTokensMinted);
+
         return () => {
+            // Clean up listeners when component unmounts
             voteEvents.listeners['delegationCompleted'] =
                 voteEvents.listeners['delegationCompleted']?.filter(
                     listener => listener !== handleDelegationCompleted
@@ -148,6 +160,10 @@ export const CheckVotingPower = () => {
             voteEvents.listeners['voteCasted'] =
                 voteEvents.listeners['voteCasted']?.filter(
                     listener => listener !== handleVoteCasted
+                );
+            voteEvents.listeners['tokensMinted'] =
+                voteEvents.listeners['tokensMinted']?.filter(
+                    listener => listener !== handleTokensMinted
                 );
         };
     }, []);

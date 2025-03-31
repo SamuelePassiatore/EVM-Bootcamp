@@ -25,7 +25,7 @@ export const CastVote = () => {
             notification.success(`Vote cast successfully! Transaction: ${tx}`);
             setProposalId("0");
             setVoteAmount("1");
-            voteEvents.emit('voteCasted'); // Add this line
+            voteEvents.emit('voteCasted');
         } catch (error) {
             console.error("Error casting vote:", error);
             notification.error(`Failed to cast vote: ${(error as Error).message}`);
