@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { Address } from "~~/components/scaffold-eth";
 import { voteEvents } from "./DelegateVote";
 
 interface ProposalResult {
@@ -10,6 +9,17 @@ interface ProposalResult {
     name: string;
     voteCount: string;
     percentage: number;
+}
+
+interface ApiVoteResult {
+    proposalId: number;
+    votes: number;
+    percentage: number;
+}
+
+interface ApiResultsData {
+    results: ApiVoteResult[];
+    totalVotes: number;
 }
 
 interface VoteRecord {
@@ -27,7 +37,8 @@ export const QueryResults = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [totalVotes, setTotalVotes] = useState<bigint>(0n);
     const [recentVotes, setRecentVotes] = useState<VoteRecord[]>([]);
-    const [showVoteHistory, setShowVoteHistory] = useState(false);
+    const [apiResults, setApiResults] = useState<ApiResultsData | null>(null);
+    const [showApiResults, setShowApiResults] = useState(true);
 
     // Get winner name and ID
     const { data: winnerName } = useScaffoldReadContract({
@@ -67,17 +78,17 @@ export const QueryResults = () => {
         args: [2n],
     });
     
-    // Fetch recent votes from backend
-    const fetchRecentVotes = async () => {
+    // Fetch API results function
+    const fetchApiResults = async () => {
         try {
-            const response = await fetch("http://localhost:3001/votes/recent");
+            const response = await fetch("http://localhost:3001/votes/results");
             if (!response.ok) {
-                throw new Error("Failed to fetch vote history");
+                throw new Error("Failed to fetch API results");
             }
             const data = await response.json();
-            setRecentVotes(data);
+            setApiResults(data);
         } catch (error) {
-            console.error("Error fetching vote history:", error);
+            console.error("Error fetching API results:", error);
         }
     };
 
@@ -129,8 +140,8 @@ export const QueryResults = () => {
             setProposals(proposalsArray);
             setIsLoading(false);
 
-            // After loading on-chain data, fetch recent votes from backend
-            fetchRecentVotes();
+            // After loading on-chain data, fetch API results
+            fetchApiResults();
         } catch (error) {
             console.error("Error processing proposals:", error);
             setIsLoading(false);
@@ -140,7 +151,7 @@ export const QueryResults = () => {
     // Listen for new votes
     useEffect(() => {
         const handleVoteCast = () => {
-            fetchRecentVotes();
+            fetchApiResults();
         };
 
         voteEvents.on('voteCasted', handleVoteCast);
@@ -162,7 +173,7 @@ export const QueryResults = () => {
     // Refresh all data
     const refreshData = () => {
         setIsLoading(true);
-        fetchRecentVotes();
+        fetchApiResults();
         // The contract data will refresh on its own via the hooks
         setTimeout(() => setIsLoading(false), 2000); // Fallback timeout
     };
@@ -183,31 +194,79 @@ export const QueryResults = () => {
                         <p className="text-sm">Proposal ID: {winningId}</p>
                     </div>
 
-                    <div>
-                        <h3 className="font-medium mb-2">All Proposals</h3>
-                        <div className="overflow-x-auto">
-                            <table className="table w-full">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Votes</th>
-                                        <th>Percentage</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {proposals.map((proposal) => (
-                                        <tr key={proposal.id} className={proposal.id.toString() === winningId ? "bg-primary/20" : ""}>
-                                            <td>{proposal.id}</td>
-                                            <td>{proposal.name}</td>
-                                            <td>{proposal.voteCount}</td>
-                                            <td>{proposal.percentage.toFixed(2)}%</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div className="tabs tabs-boxed">
+                        <a
+                            className={`tab ${!showApiResults ? "tab-active" : ""}`}
+                            onClick={() => setShowApiResults(false)}
+                        >
+                            Blockchain Results
+                        </a>
+                        <a
+                            className={`tab ${showApiResults ? "tab-active" : ""}`}
+                            onClick={() => setShowApiResults(true)}
+                        >
+                            API Results
+                        </a>
                     </div>
+
+                    {!showApiResults ? (
+                        // Blockchain results tab
+                        <div>
+                            <h3 className="font-medium mb-2">On-Chain Proposals</h3>
+                            <div className="overflow-x-auto">
+                                <table className="table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Votes</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {proposals.map((proposal) => (
+                                            <tr key={proposal.id} className={proposal.id.toString() === winningId ? "bg-primary/20" : ""}>
+                                                <td>{proposal.id}</td>
+                                                <td>{proposal.name}</td>
+                                                <td>{proposal.voteCount}</td>
+                                                <td>{proposal.percentage.toFixed(2)}%</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ) : (
+                        // API results tab
+                        <div>
+                            <h3 className="font-medium mb-2">API Recorded Votes</h3>
+                            {!apiResults || apiResults.totalVotes === 0 ? (
+                                <p className="text-center py-4">No votes recorded in API yet</p>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <p className="mb-2">Total API Recorded Votes: {apiResults.totalVotes}</p>
+                                    <table className="table w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Votes</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {apiResults.results.map((result) => (
+                                                <tr key={result.proposalId}>
+                                                    <td>{result.proposalId}</td>
+                                                    <td>{result.votes}</td>
+                                                    <td>{result.percentage.toFixed(2)}%</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div className="flex justify-end">
                         <button

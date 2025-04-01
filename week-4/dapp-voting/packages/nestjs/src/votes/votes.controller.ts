@@ -32,4 +32,10 @@ export class VotesController {
     getVotesByAddress(@Param('address') address: string): VoteRecordDto[] {
         return this.votesService.getVotesByAddress(address);
     }
+
+    @Get('results')
+    @ApiOperation({ summary: 'Get calculated results from recent votes' })
+    getVoteResults() {
+        return this.votesService.calculateVoteResults();
+    }
 }

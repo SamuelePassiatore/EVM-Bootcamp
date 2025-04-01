@@ -38,4 +38,38 @@ export class VotesService {
     getRecentVotes(): VoteRecordDto[] {
         return this.votes.slice(-10).reverse();
     }
+
+    calculateVoteResults() {
+        // Group votes by proposal ID and sum the amounts
+        const proposalVotes = {};
+        let totalVotes = 0;
+        
+        this.votes.forEach(vote => {
+            if (!proposalVotes[vote.proposalId]) {
+                proposalVotes[vote.proposalId] = 0;
+            }
+            proposalVotes[vote.proposalId] += vote.amount;
+            totalVotes += vote.amount;
+        });
+        
+        // Calculate percentages and format results
+        const results = Object.keys(proposalVotes).map(proposalId => {
+            const votes = proposalVotes[proposalId];
+            const percentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
+            
+            return {
+                proposalId: parseInt(proposalId),
+                votes,
+                percentage
+            };
+        });
+        
+        // Sort by votes (descending)
+        results.sort((a, b) => b.votes - a.votes);
+        
+        return {
+            results,
+            totalVotes
+        };
+    }
 }
