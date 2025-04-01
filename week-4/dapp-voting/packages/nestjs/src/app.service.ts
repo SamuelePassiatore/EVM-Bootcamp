@@ -10,6 +10,7 @@ import {
   WalletClient,
   Account,
   getAddress,
+  stringToHex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
@@ -128,43 +129,23 @@ export class AppService {
       if (!tokenAddress) {
         throw new Error('TOKEN_ADDRESS is not defined in environment variables');
       }
-
-      // Get current ballot address dynamically
-      const currentBallotAddress = await this.getCurrentBallotAddress();
-      console.log(`Found current ballot at: ${currentBallotAddress}`);
-
-      // Read proposals from current ballot
-      const proposals: `0x${string}`[] = [];
-      try {
-        let index = 0;
-        while (true) {
-          const proposal = await this.publicClient.readContract({
-            address: currentBallotAddress as `0x${string}`,
-            abi: ballotJson.abi,
-            functionName: 'proposals',
-            args: [BigInt(index)]
-          }) as [bytes32: `0x${string}`, voteCount: bigint];
-
-          proposals.push(proposal[0]);
-          console.log(`Read proposal ${index}: ${proposal[0]}`);
-          index++;
-        }
-      } catch (error) {
-        // This error is expected when we've read all proposals
-        console.log(`Found ${proposals.length} proposals`);
-      }
-
-      if (proposals.length === 0) {
-        throw new Error('No proposals found in the existing ballot contract');
-      }
-
+      
+      // Get oracle data for proposals
+      const proposalNames = await this.fetchProposalDataFromOracle();
+      console.log("Creating proposals from oracle data:", proposalNames);
+      
+      // Convert proposal names to bytes32
+      const proposals = proposalNames.map(name =>
+        stringToHex(name, { size: 32 })
+      );
+      
       // Get current block and set target block slightly before it
       const block = await this.publicClient.getBlock();
       const targetBlockNumber = block.number - 10n;
       console.log(`Using target block number: ${targetBlockNumber}`);
-
-      // Deploy new contract
-      console.log('Deploying new ballot contract...');
+      
+      // Deploy new contract with oracle data
+      console.log('Deploying new ballot contract with oracle data...');
       const tx = await this.walletClient.deployContract({
         abi: ballotJson.abi,
         bytecode: ballotJson.bytecode as `0x${string}`,
@@ -172,14 +153,14 @@ export class AppService {
         account: this.account,
         chain: sepolia
       });
-
+      
       console.log(`Deployment transaction: ${tx}`);
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash: tx });
       const newContractAddress = receipt.contractAddress as `0x${string}`;
-
+      
       // Update the deployedContracts.ts file with the new address
       this.updateDeployedContractsFile(newContractAddress);
-
+      
       console.log(`TokenizedBallot redeployed to: ${newContractAddress}`);
       return newContractAddress;
     } catch (error) {
@@ -212,6 +193,21 @@ export class AppService {
     } catch (error) {
       console.error('Failed to update deployedContracts.ts:', error);
       // Don't throw, just log the error since this is not critical
+    }
+  }
+
+  async fetchProposalDataFromOracle(): Promise<string[]> {
+    try {
+      // Simple API call to simulate oracle data
+      const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=3&page=1');
+      const data = await response.json();
+      
+      // Extract cryptocurrency names
+      return data.map(crypto => crypto.name);
+    } catch (error) {
+      console.error("Error fetching oracle data:", error);
+      // Fallback proposals
+      return ["Proposal A", "Proposal B", "Proposal C"];
     }
   }
 
