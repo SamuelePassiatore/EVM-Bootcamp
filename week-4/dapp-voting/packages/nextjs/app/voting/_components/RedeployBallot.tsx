@@ -18,7 +18,6 @@ export const RedeployBallot = () => {
             }
             const data = await response.json();
             notification.success(`Ballot redeployed successfully! New contract: ${data.newContractAddress}`);
-            window.location.reload();
         } catch (error) {
             console.error("Error redeploying ballot:", error);
             notification.error(`Failed to redeploy: ${(error as Error).message}`);

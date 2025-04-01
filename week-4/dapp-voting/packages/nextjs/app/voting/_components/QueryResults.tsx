@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { Address } from "~~/components/scaffold-eth";
+import { voteEvents } from "./DelegateVote";
 
 interface ProposalResult {
     id: number;
@@ -10,12 +12,22 @@ interface ProposalResult {
     percentage: number;
 }
 
+interface VoteRecord {
+    voter: string;
+    proposalId: number;
+    amount: number;
+    transactionHash: string;
+    timestamp?: string;
+}
+
 export const QueryResults = () => {
     const [proposals, setProposals] = useState<ProposalResult[]>([]);
     const [winningProposal, setWinningProposal] = useState<string>("");
     const [winningId, setWinningId] = useState<string>("0");
     const [isLoading, setIsLoading] = useState(true);
     const [totalVotes, setTotalVotes] = useState<bigint>(0n);
+    const [recentVotes, setRecentVotes] = useState<VoteRecord[]>([]);
+    const [showVoteHistory, setShowVoteHistory] = useState(false);
 
     // Get winner name and ID
     const { data: winnerName } = useScaffoldReadContract({
@@ -54,6 +66,20 @@ export const QueryResults = () => {
         functionName: "proposals",
         args: [2n],
     });
+    
+    // Fetch recent votes from backend
+    const fetchRecentVotes = async () => {
+        try {
+            const response = await fetch("http://localhost:3001/votes/recent");
+            if (!response.ok) {
+                throw new Error("Failed to fetch vote history");
+            }
+            const data = await response.json();
+            setRecentVotes(data);
+        } catch (error) {
+            console.error("Error fetching vote history:", error);
+        }
+    };
 
     // Process proposals after they're loaded
     useEffect(() => {
@@ -102,11 +128,30 @@ export const QueryResults = () => {
             setTotalVotes(totalVotesCast);
             setProposals(proposalsArray);
             setIsLoading(false);
+
+            // After loading on-chain data, fetch recent votes from backend
+            fetchRecentVotes();
         } catch (error) {
             console.error("Error processing proposals:", error);
             setIsLoading(false);
         }
     }, [proposal0, proposal1, proposal2, isLoading0, isLoading1, isLoading2, winnerName, winningProposalId]);
+
+    // Listen for new votes
+    useEffect(() => {
+        const handleVoteCast = () => {
+            fetchRecentVotes();
+        };
+
+        voteEvents.on('voteCasted', handleVoteCast);
+
+        return () => {
+            voteEvents.listeners['voteCasted'] = 
+                voteEvents.listeners['voteCasted']?.filter(
+                    listener => listener !== handleVoteCast
+                );
+        };
+    }, []);
 
     // Ensure loading state doesn't get stuck
     useEffect(() => {
@@ -114,58 +159,66 @@ export const QueryResults = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Refresh all data
+    const refreshData = () => {
+        setIsLoading(true);
+        fetchRecentVotes();
+        // The contract data will refresh on its own via the hooks
+        setTimeout(() => setIsLoading(false), 2000); // Fallback timeout
+    };
+
     return (
         <div className="bg-base-100 shadow-md rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Voting Results</h2>
-        
-        {isLoading ? (
-            <div className="flex justify-center">
-            <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        ) : (
-            <div className="flex flex-col gap-4">
-            <div className="bg-base-200 p-4 rounded-lg">
-                <h3 className="font-medium">Current Winner</h3>
-                <p className="text-lg">{winningProposal || "No winner yet"}</p>
-                <p className="text-sm">Proposal ID: {winningId}</p>
-            </div>
+            <h2 className="text-xl font-semibold mb-4">Voting Results</h2>
             
-            <div>
-                <h3 className="font-medium mb-2">All Proposals</h3>
-                <div className="overflow-x-auto">
-                <table className="table w-full">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Votes</th>
-                        <th>Percentage</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {proposals.map((proposal) => (
-                        <tr key={proposal.id} className={proposal.id.toString() === winningId ? "bg-primary/20" : ""}>
-                        <td>{proposal.id}</td>
-                        <td>{proposal.name}</td>
-                        <td>{proposal.voteCount}</td>
-                        <td>{proposal.percentage.toFixed(2)}%</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+            {isLoading ? (
+                <div className="flex justify-center">
+                    <span className="loading loading-spinner loading-lg"></span>
                 </div>
-            </div>
-            
-            <div className="flex justify-end">
-                <button
-                className="btn btn-outline btn-sm"
-                onClick={() => window.location.reload()}
-                >
-                Refresh Results
-                </button>
-            </div>
-            </div>
-        )}
+            ) : (
+                <div className="flex flex-col gap-4">
+                    <div className="bg-base-200 p-4 rounded-lg">
+                        <h3 className="font-medium">Current Winner</h3>
+                        <p className="text-lg">{winningProposal || "No winner yet"}</p>
+                        <p className="text-sm">Proposal ID: {winningId}</p>
+                    </div>
+
+                    <div>
+                        <h3 className="font-medium mb-2">All Proposals</h3>
+                        <div className="overflow-x-auto">
+                            <table className="table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Votes</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {proposals.map((proposal) => (
+                                        <tr key={proposal.id} className={proposal.id.toString() === winningId ? "bg-primary/20" : ""}>
+                                            <td>{proposal.id}</td>
+                                            <td>{proposal.name}</td>
+                                            <td>{proposal.voteCount}</td>
+                                            <td>{proposal.percentage.toFixed(2)}%</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            className="btn btn-outline btn-sm"
+                            onClick={refreshData}
+                        >
+                            Refresh Results
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

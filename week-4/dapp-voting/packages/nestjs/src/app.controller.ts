@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { MintTokenDto } from './mintToken.dto';
+import { MintTokenDto } from './dtos/mintToken.dto';
 
 @ApiTags('TokenizedBallot')
 @Controller()
