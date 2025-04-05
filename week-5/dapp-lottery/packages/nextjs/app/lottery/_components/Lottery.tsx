@@ -6,11 +6,14 @@ import { SharedProps } from "../utils";
 import BuyLotteryToken from "./BuyLotteryToken";
 import { createWalletClient, http } from "viem";
 import { hardhat } from "viem/chains";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const MAXUINT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 
 const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
+  const { data: lotteryContract } = useScaffoldContract({
+    contractName: "Lottery",
+  });
   const { data: prize } = useScaffoldReadContract({
     contractName: "Lottery",
     functionName: "prize",
@@ -19,10 +22,6 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
   const { data: betsOpen } = useScaffoldReadContract({
     contractName: "Lottery",
     functionName: "betsOpen",
-  });
-  const { data: paymentToken } = useScaffoldReadContract({
-    contractName: "Lottery",
-    functionName: "paymentToken",
   });
   const { data: betPrice } = useScaffoldReadContract({
     contractName: "Lottery",
@@ -50,7 +49,7 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
         address: process.env.NEXT_PUBLIC_TOKEN_ADDRESS,
         functionName: "approve",
         abi: abi,
-        args: [process.env.NEXT_PUBLIC_LOTTERY_ADDRESS, MAXUINT256],
+        args: [lotteryContract?.address, MAXUINT256],
       });
     } else {
       throw new Error("Bet fee or price is not available");
@@ -59,7 +58,31 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
     await writeContractAsync({
       functionName: "bet",
     });
-  }, [address, writeContractAsync, betFee, betPrice]);
+  }, [address, writeContractAsync, betFee, betPrice, lotteryContract]);
+
+  const handleCloseLottery = useCallback(async () => {
+    await writeContractAsync({
+      functionName: "closeLottery",
+    });
+  }, [writeContractAsync]);
+  const handleWithdraw = useCallback(async () => {
+    const amount = prompt("Amount:");
+    if (amount) {
+      await writeContractAsync({
+        functionName: "prizeWithdraw",
+        args: [BigInt(amount)],
+      });
+    }
+  }, [writeContractAsync]);
+  const handleBurn = useCallback(async () => {
+    const amount = prompt("Amount:");
+    if (amount) {
+      await writeContractAsync({
+        functionName: "returnTokens",
+        args: [BigInt(amount)],
+      });
+    }
+  }, [writeContractAsync]);
 
   return (
     <div className="bg-base-100 shadow-md rounded-xl p-6 mb-8 w-full max-w-l">
@@ -69,12 +92,21 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
         <div className="mt-2">
           <BuyLotteryToken />
         </div>
+        <div className="mt-2">Prize: {prize}</div>
+        <button className="btn" onClick={handleWithdraw}>
+          Withdraw Prize
+        </button>
+        <button className="btn" onClick={handleBurn}>
+          Burn Token
+        </button>
         {betsOpen && (
           <>
-            <div className="mt-2">Bets: {prize}</div>
             <div className="mt-2">
               <button className="btn" onClick={handleBet}>
                 Place Bets
+              </button>
+              <button className="btn" onClick={handleCloseLottery}>
+                Close Lottery
               </button>
             </div>
           </>

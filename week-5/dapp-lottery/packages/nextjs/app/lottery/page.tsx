@@ -36,7 +36,10 @@ const Page = () => {
         <div className="flex items-center flex-col flex-grow pt-10">
           <Address address={connectedAddress} format="long" />
           <div>
-            Balances: <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
+            ETH Balances: <Balance address={connectedAddress} useEtherFormat={true} />
+          </div>
+          <div>
+            Token Balances: <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
           </div>
         </div>
       </div>

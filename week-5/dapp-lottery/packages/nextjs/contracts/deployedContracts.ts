@@ -162,6 +162,13 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "closeLotteryForce",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "getRandomNumber",
           outputs: [
             {

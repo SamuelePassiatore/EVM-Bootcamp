@@ -15,6 +15,20 @@ const LotteryAdmin: React.FC = () => {
       args: [BigInt(closeTimeInSeconds)],
     });
   }, [writeContractAsync]);
+  const closeLottery = useCallback(async () => {
+    await writeContractAsync({
+      functionName: "closeLotteryForce",
+    });
+  }, [writeContractAsync]);
+  const withdrawFeePool = useCallback(async () => {
+    const amount = prompt("Amount:");
+    if (amount) {
+      await writeContractAsync({
+        functionName: "ownerWithdraw",
+        args: [BigInt(amount)],
+      });
+    }
+  }, [writeContractAsync]);
 
   return (
     <div className="bg-base-100 shadow-md rounded-xl p-6 mb-8 w-full max-w-l">
@@ -22,6 +36,12 @@ const LotteryAdmin: React.FC = () => {
       <div className="flex items-center flex-col flex-grow pt-10">
         <button className="btn" onClick={startLottery}>
           Start Lottery
+        </button>
+        <button className="btn" onClick={closeLottery}>
+          Close Lottery Force
+        </button>
+        <button className="btn" onClick={withdrawFeePool}>
+          Withdraw Fee Pool
         </button>
       </div>
     </div>

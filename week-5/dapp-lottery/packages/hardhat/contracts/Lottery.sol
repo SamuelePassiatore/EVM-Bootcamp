@@ -110,6 +110,18 @@ contract Lottery is Ownable {
         betsOpen = false;
     }
 
+    function closeLotteryForce() external onlyOwner {
+        require(betsOpen, "Already closed");
+        if (_slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            address winner = _slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete (_slots);
+        }
+        betsOpen = false;
+    }
+
     /// @notice Returns a random number calculated from the previous block randao
     /// @dev This only works after The Merge
     function getRandomNumber() public view returns (uint256 randomNumber) {
