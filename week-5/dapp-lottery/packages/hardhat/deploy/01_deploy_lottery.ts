@@ -1,13 +1,14 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import type { DeployFunction } from "hardhat-deploy/types";
+import { getAddress } from "ethers";
 
 /**
- * Deploys a contract named "MyToken" using the deployer account and
+ * Deploys a contract named "Lottery" using the deployer account and
  * constructor arguments set to the deployer address
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
-const deployMyToken: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployLottery: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
 
@@ -21,22 +22,28 @@ const deployMyToken: DeployFunction = async function (hre: HardhatRuntimeEnviron
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  const result = await deploy("MyToken", {
+  const purchaseRatio = 1;
+  const betPrice = 1;
+  const betFee = 1;
+
+  const result = await deploy("Lottery", {
     from: deployer,
     // Contract constructor arguments
-    args: [],
+    args: ["MyLotteryToken", "MLT", purchaseRatio, betPrice, betFee],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
     autoMine: true,
   });
 
-  const yourContract = await hre.viem.getContractAt("MyToken", result.address);
-  console.log("👋 TotalSupply:", await yourContract.read.totalSupply());
+  // Get the deployed contract to interact with it after deploying.
+
+  const yourContract = await hre.viem.getContractAt("Lottery", result.address);
+  console.log("👋 betsOpen:", await yourContract.read.betsOpen());
 };
 
-export default deployMyToken;
+export default deployLottery;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags YourContract
-deployMyToken.tags = ["MyToken"];
+deployLottery.tags = ["Lottery"];

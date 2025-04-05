@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { LotteryToken } from "./LotteryToken.sol";
@@ -51,20 +51,37 @@ contract Lottery is Ownable {
         betFee = _betFee;
     }
 
-    /// @notice Opens the lottery for receiving bets
-    function openBets() external {
-        // TODO
+    /// @notice Passes when the lottery is at closed state
+    modifier whenBetsClosed() {
+        require(!betsOpen, "Lottery is open");
+        _;
     }
 
-    /// @notice Gives tokens based on the amount of ETH sent and the purchase ratio
+    /// @notice Passes when the lottery is at open state and the current block timestamp is lower than the lottery closing date
+    modifier whenBetsOpen() {
+        require(betsOpen && block.timestamp < betsClosingTime, "Lottery is closed");
+        _;
+    }
+
+    /// @notice Opens the lottery for receiving bets
+    function openBets(uint256 closingTime) external onlyOwner whenBetsClosed {
+        require(closingTime > block.timestamp, "Closing time must be in the future");
+        betsClosingTime = closingTime;
+        betsOpen = true;
+    }
+
+    /// @notice Gives tokens based on the amount of ETH sent
     /// @dev This implementation is prone to rounding problems
-    function purchaseTokens() external {
-        // TODO
+    function purchaseTokens() external payable {
+        paymentToken.mint(msg.sender, msg.value * purchaseRatio);
     }
 
     /// @notice Charges the bet price and creates a new bet slot with the sender's address
-    function bet() public {
-        // TODO
+    function bet() public whenBetsOpen {
+        ownerPool += betFee;
+        prizePool += betPrice;
+        _slots.push(msg.sender);
+        paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
     }
 
     /// @notice Calls the bet function `times` times
@@ -74,33 +91,46 @@ contract Lottery is Ownable {
             bet();
             times--;
         }
-        // TODO (Bonus): optimize this
     }
 
     /// @notice Closes the lottery and calculates the prize, if any
     /// @dev Anyone can call this function at any time after the closing time
     function closeLottery() external {
-        // TODO
+        require(block.timestamp >= betsClosingTime, "Too soon to close");
+        require(betsOpen, "Already closed");
+        if (_slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            address winner = _slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete (_slots);
+        }
+        betsOpen = false;
     }
 
     /// @notice Returns a random number calculated from the previous block randao
     /// @dev This only works after The Merge
-    function getRandomNumber() external {
-        // TODO
+    function getRandomNumber() public view returns (uint256 randomNumber) {
+        randomNumber = block.prevrandao;
     }
 
     /// @notice Withdraws `amount` from that accounts's prize pool
     function prizeWithdraw(uint256 amount) external {
-        // TODO
+        require(amount <= prize[msg.sender], "Not enough prize");
+        prize[msg.sender] -= amount;
+        paymentToken.transfer(msg.sender, amount);
     }
 
     /// @notice Withdraws `amount` from the owner's pool
     function ownerWithdraw(uint256 amount) external onlyOwner {
-        // TODO
+        require(amount <= ownerPool, "Not enough fees collected");
+        ownerPool -= amount;
+        paymentToken.transfer(msg.sender, amount);
     }
 
     /// @notice Burns `amount` tokens and give the equivalent ETH back to user
     function returnTokens(uint256 amount) external {
-        // TODO
+        paymentToken.burnFrom(msg.sender, amount);
+        payable(msg.sender).transfer(amount / purchaseRatio);
     }
 }
