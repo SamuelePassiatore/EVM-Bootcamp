@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback } from "react";
+import { abi } from "../../../artifacts/contracts/LotteryToken.sol/LotteryToken.json";
 import { SharedProps } from "../utils";
 import BuyLotteryToken from "./BuyLotteryToken";
+import { createWalletClient, http } from "viem";
+import { hardhat } from "viem/chains";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+
+const MAXUINT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 
 const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
   const { data: prize } = useScaffoldReadContract({
@@ -32,24 +37,24 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
   });
 
   const handleBet = useCallback(async () => {
-    // if (!process.env.NEXT_PUBLIC_LOTTERY_ADDRESS) {
-    //   throw new Error("NEXT_PUBLIC_TOKEN_ADDRESS is not defined");
-    // }
-    // const walletClient = createWalletClient({
-    //   chain: hardhat,
-    //   transport: http(),
-    // });
-    // if (betFee && betPrice) {
-    //   await walletClient.writeContract({
-    //     account: address,
-    //     address: process.env.NEXT_PUBLIC_LOTTERY_ADDRESS,
-    //     functionName: "approve",
-    //     abi: abi,
-    //     args: [address, betFee * betPrice],
-    //   });
-    // } else {
-    //   throw new Error("Bet fee or price is not available");
-    // }
+    if (!process.env.NEXT_PUBLIC_TOKEN_ADDRESS) {
+      throw new Error("NEXT_PUBLIC_TOKEN_ADDRESS is not defined");
+    }
+    const walletClient = createWalletClient({
+      chain: hardhat,
+      transport: http(),
+    });
+    if (betFee && betPrice) {
+      await walletClient.writeContract({
+        account: address,
+        address: process.env.NEXT_PUBLIC_TOKEN_ADDRESS,
+        functionName: "approve",
+        abi: abi,
+        args: [process.env.NEXT_PUBLIC_LOTTERY_ADDRESS, MAXUINT256],
+      });
+    } else {
+      throw new Error("Bet fee or price is not available");
+    }
 
     await writeContractAsync({
       functionName: "bet",
