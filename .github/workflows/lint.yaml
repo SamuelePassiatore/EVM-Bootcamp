@@ -5,44 +5,48 @@ on:
   push:
     branches:
       - main
-    paths:
-      - week-4/dapp-voting/
+  pull_request:
 
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node: [lts/*]
+        path: ["week-4/dapp-voting", "week-5/dapp-lottery"]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            project:
+              - '${{ matrix.path }}/**'
 
       - name: Setup node env
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version: lts/*
           cache: yarn
-          cache-dependency-path: week-4/dapp-voting/yarn.lock
+          cache-dependency-path: ${{ matrix.path yarn.lock
 
       - name: Install dependencies
         run: yarn install --immutable
-        working-directory: week-4/dapp-voting/
+        working-directory: ${{ matrix.path }}
 
       - name: Run hardhat node, deploy contracts (& generate contracts typescript output)
         run: yarn chain & yarn deploy
-        working-directory: week-4/dapp-voting/
+        working-directory: ${{ matrix.path }}
 
       - name: Run hardhat lint
         run: yarn hardhat:lint --max-warnings=0
-        working-directory: week-4/dapp-voting/
+        working-directory: ${{ matrix.path }}
 
       - name: Run nextjs lint
         run: yarn next:lint --max-warnings=0
-        working-directory: week-4/dapp-voting/
+        working-directory: ${{ matrix.path }}
 
       - name: Check typings on nextjs
         run: yarn next:check-types
-        working-directory: week-4/dapp-voting/
+        working-directory: ${{ matrix.path }}
