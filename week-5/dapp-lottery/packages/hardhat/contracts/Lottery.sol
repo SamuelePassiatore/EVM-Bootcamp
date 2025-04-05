@@ -81,6 +81,8 @@ contract Lottery is Ownable {
         ownerPool += betFee;
         prizePool += betPrice;
         _slots.push(msg.sender);
+        paymentToken.approve(msg.sender, betPrice + betFee);
+        paymentToken.allowance(msg.sender, address(this));
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
     }
 
@@ -97,6 +99,18 @@ contract Lottery is Ownable {
     /// @dev Anyone can call this function at any time after the closing time
     function closeLottery() external {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
+        require(betsOpen, "Already closed");
+        if (_slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            address winner = _slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete (_slots);
+        }
+        betsOpen = false;
+    }
+
+    function closeLotteryForce() external onlyOwner {
         require(betsOpen, "Already closed");
         if (_slots.length > 0) {
             uint256 winnerIndex = getRandomNumber() % _slots.length;

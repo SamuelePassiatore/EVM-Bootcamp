@@ -21,8 +21,8 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
-    label: "Voting",
-    href: "/voting",
+    label: "Lottery",
+    href: "/lottery",
   },
   {
     label: "Debug Contracts",

@@ -1,6 +1,5 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import type { DeployFunction } from "hardhat-deploy/types";
-import { getAddress } from "ethers";
 
 /**
  * Deploys a contract named "Lottery" using the deployer account and
@@ -26,10 +25,11 @@ const deployLottery: DeployFunction = async (hre: HardhatRuntimeEnvironment) => 
   const betPrice = 1;
   const betFee = 1;
 
+  // const MyToken = await hre.deployments.get("LotteryToken");
   const result = await deploy("Lottery", {
     from: deployer,
     // Contract constructor arguments
-    args: ["MyLotteryToken", "MLT", purchaseRatio, betPrice, betFee],
+    args: ["LotteryToken", "MLT", purchaseRatio, betPrice, betFee],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -39,7 +39,7 @@ const deployLottery: DeployFunction = async (hre: HardhatRuntimeEnvironment) => 
   // Get the deployed contract to interact with it after deploying.
 
   const yourContract = await hre.viem.getContractAt("Lottery", result.address);
-  console.log("👋 betsOpen:", await yourContract.read.betsOpen());
+  console.log("👋 PaymentToken Addr:", await yourContract.read.paymentToken());
 };
 
 export default deployLottery;

@@ -1,53 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
-function RequestTokens(params: { address: string }) {
-  const [data, setData] = useState<{ result: boolean }>();
-  const [isLoading, setLoading] = useState(false);
-  const body = { address: params.address };
-  
-  if (isLoading) return <p>Requesting tokens from API...</p>;
-  if (!data)
-    return (
-      <button
-        className="btn btn-active btn-neutral"
-        onClick={() => {
-          setLoading(true);
-          fetch("http://localhost:3001/mint", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              setData(data);
-              setLoading(false);
-            });
-        }}
-      >
-        Request tokens
-      </button>
-    );
-  
-  return (
-    <div>
-      <p>Result from API: {data.result ? "worked" : "failed"}</p>
-    </div>
-  );
-}
-
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
-
-  if (!process.env.NEXT_PUBLIC_TOKEN_ADDRESS) {
-    throw new Error("missing NEXT_PUBLIC_TOKEN_ADDRESS");
-  }
 
   return (
     <>
@@ -59,33 +19,7 @@ const Home: NextPage = () => {
           </h1>
           <div className="flex justify-center items-center space-x-2 flex-col">
             <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-            <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
-            
-            {/* Component for requesting tokens */}
-            {connectedAddress && (
-              <div className="mt-2">
-                <RequestTokens address={connectedAddress} />
-              </div>
-            )}
           </div>
-
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
