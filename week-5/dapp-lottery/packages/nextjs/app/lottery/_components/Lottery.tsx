@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { SharedProps } from "../utils";
 import BuyLotteryToken from "./BuyLotteryToken";
-import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
   const { data: prize } = useScaffoldReadContract({
@@ -19,20 +19,42 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
     contractName: "Lottery",
     functionName: "paymentToken",
   });
+  const { data: betPrice } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "betPrice",
+  });
+  const { data: betFee } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "betFee",
+  });
   const { writeContractAsync } = useScaffoldWriteContract({
     contractName: "Lottery",
   });
 
-  const { writeContractAsync } = useScaffoldWriteContract({
-    contractName: "LotteryToken",
-  });
-
   const handleBet = useCallback(async () => {
+    // if (!process.env.NEXT_PUBLIC_LOTTERY_ADDRESS) {
+    //   throw new Error("NEXT_PUBLIC_TOKEN_ADDRESS is not defined");
+    // }
+    // const walletClient = createWalletClient({
+    //   chain: hardhat,
+    //   transport: http(),
+    // });
+    // if (betFee && betPrice) {
+    //   await walletClient.writeContract({
+    //     account: address,
+    //     address: process.env.NEXT_PUBLIC_LOTTERY_ADDRESS,
+    //     functionName: "approve",
+    //     abi: abi,
+    //     args: [address, betFee * betPrice],
+    //   });
+    // } else {
+    //   throw new Error("Bet fee or price is not available");
+    // }
 
     await writeContractAsync({
       functionName: "bet",
     });
-  }, [writeContractAsync]);
+  }, [address, writeContractAsync, betFee, betPrice]);
 
   return (
     <div className="bg-base-100 shadow-md rounded-xl p-6 mb-8 w-full max-w-l">

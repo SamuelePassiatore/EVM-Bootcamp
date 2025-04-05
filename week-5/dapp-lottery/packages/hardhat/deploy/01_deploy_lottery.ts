@@ -25,11 +25,11 @@ const deployLottery: DeployFunction = async (hre: HardhatRuntimeEnvironment) => 
   const betPrice = 1;
   const betFee = 1;
 
-  const MyToken = hre.deployments.get("LotteryToken");
+  // const MyToken = await hre.deployments.get("LotteryToken");
   const result = await deploy("Lottery", {
     from: deployer,
     // Contract constructor arguments
-    args: [(await MyToken).address, purchaseRatio, betPrice, betFee],
+    args: ["LotteryToken", "MLT", purchaseRatio, betPrice, betFee],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -47,4 +47,3 @@ export default deployLottery;
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags YourContract
 deployLottery.tags = ["Lottery"];
-deployLottery.dependencies = ["LotteryToken"];

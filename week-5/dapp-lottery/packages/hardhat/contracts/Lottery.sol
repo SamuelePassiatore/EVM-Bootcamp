@@ -33,17 +33,19 @@ contract Lottery is Ownable {
     address[] _slots;
 
     /// @notice Constructor function
-    /// @param _paymentToken Name of the token used for payment
+    /// @param tokenName Name of the token used for payment
+    /// @param tokenSymbol Symbol of the token used for payment
     /// @param _purchaseRatio Amount of tokens given per ETH paid
     /// @param _betPrice Amount of tokens required for placing a bet that goes for the prize pool
     /// @param _betFee Amount of tokens required for placing a bet that goes for the owner pool
     constructor(
-        LotteryToken _paymentToken,
+        string memory tokenName,
+        string memory tokenSymbol,
         uint256 _purchaseRatio,
         uint256 _betPrice,
         uint256 _betFee
     ) Ownable(msg.sender) {
-        paymentToken = _paymentToken;
+        paymentToken = new LotteryToken(tokenName, tokenSymbol);
         purchaseRatio = _purchaseRatio;
         betPrice = _betPrice;
         betFee = _betFee;
@@ -79,6 +81,8 @@ contract Lottery is Ownable {
         ownerPool += betFee;
         prizePool += betPrice;
         _slots.push(msg.sender);
+        paymentToken.approve(msg.sender, betPrice + betFee);
+        paymentToken.allowance(msg.sender, address(this));
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
     }
 
