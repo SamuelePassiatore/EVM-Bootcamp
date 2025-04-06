@@ -41,10 +41,7 @@ const Lottery: React.FC<SharedProps> = ({ address, token }: SharedProps) => {
     contractName: "Lottery",
     functionName: "prizePool",
   });
-  const { data: purchaseRatio } = useScaffoldReadContract({
-    contractName: "Lottery",
-    functionName: "purchaseRatio",
-  });
+
   const { writeContractAsync } = useScaffoldWriteContract({
     contractName: "Lottery",
   });
