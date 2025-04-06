@@ -1,9 +1,14 @@
 import { useCallback } from "react";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const LotteryAdmin: React.FC = () => {
   const { writeContractAsync } = useScaffoldWriteContract({
     contractName: "Lottery",
+  });
+
+  const { data: ownerPool } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "ownerPool",
   });
 
   const startLottery = useCallback(async () => {
@@ -34,6 +39,7 @@ const LotteryAdmin: React.FC = () => {
     <div className="bg-base-100 shadow-md rounded-xl p-6 mb-8 w-full max-w-l">
       <h2 className="text-xl font-semibold mb-4">Lottery Admin</h2>
       <div className="flex items-center flex-col flex-grow pt-10">
+        <div className="mt-2">Owner Pool: {ownerPool}</div>
         <button className="btn" onClick={startLottery}>
           Start Lottery
         </button>

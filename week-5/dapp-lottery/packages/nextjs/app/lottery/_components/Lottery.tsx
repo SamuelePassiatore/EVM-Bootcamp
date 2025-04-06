@@ -2,15 +2,21 @@
 
 import { useCallback } from "react";
 import { abi } from "../../../artifacts/contracts/LotteryToken.sol/LotteryToken.json";
-import { SharedProps } from "../utils";
+import type { SharedProps } from "../utils";
 import BuyLotteryToken from "./BuyLotteryToken";
 import { createWalletClient, http } from "viem";
 import { hardhat } from "viem/chains";
-import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import {
+  useFetchBlocks,
+  useScaffoldContract,
+  useScaffoldReadContract,
+  useScaffoldWriteContract,
+} from "~~/hooks/scaffold-eth";
+import type { TransactionWithFunction } from "~~/utils/scaffold-eth";
 
 const MAXUINT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 
-const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
+const Lottery: React.FC<SharedProps> = ({ address, token }: SharedProps) => {
   const { data: lotteryContract } = useScaffoldContract({
     contractName: "Lottery",
   });
@@ -31,14 +37,20 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
     contractName: "Lottery",
     functionName: "betFee",
   });
+  const { data: prizePool } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "prizePool",
+  });
+  const { data: purchaseRatio } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "purchaseRatio",
+  });
   const { writeContractAsync } = useScaffoldWriteContract({
     contractName: "Lottery",
   });
+  const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage, error } = useFetchBlocks();
 
   const handleBet = useCallback(async () => {
-    if (!process.env.NEXT_PUBLIC_TOKEN_ADDRESS) {
-      throw new Error("NEXT_PUBLIC_TOKEN_ADDRESS is not defined");
-    }
     const walletClient = createWalletClient({
       chain: hardhat,
       transport: http(),
@@ -46,7 +58,7 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
     if (betFee && betPrice) {
       await walletClient.writeContract({
         account: address,
-        address: process.env.NEXT_PUBLIC_TOKEN_ADDRESS,
+        address: token,
         functionName: "approve",
         abi: abi,
         args: [lotteryContract?.address, MAXUINT256],
@@ -58,7 +70,7 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
     await writeContractAsync({
       functionName: "bet",
     });
-  }, [address, writeContractAsync, betFee, betPrice, lotteryContract]);
+  }, [address, token, writeContractAsync, betFee, betPrice, lotteryContract]);
 
   const handleCloseLottery = useCallback(async () => {
     await writeContractAsync({
@@ -87,29 +99,93 @@ const Lottery: React.FC<SharedProps> = ({ address }: SharedProps) => {
   return (
     <div className="bg-base-100 shadow-md rounded-xl p-6 mb-8 w-full max-w-l">
       <h2 className="text-xl font-semibold mb-4">Lottery</h2>
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="mt-2">Lottery Status: {betsOpen ? "Open" : "Closed"}</div>
-        <div className="mt-2">
-          <BuyLotteryToken />
-        </div>
-        <div className="mt-2">Prize: {prize}</div>
-        <button className="btn" onClick={handleWithdraw}>
-          Withdraw Prize
-        </button>
-        <button className="btn" onClick={handleBurn}>
-          Burn Token
-        </button>
-        {betsOpen && (
-          <>
-            <div className="mt-2">
-              <button className="btn" onClick={handleBet}>
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col items-start w-1/3 space-y-4">
+          <div className="p-3 rounded-lg w-full">
+            <span className="font-semibold">Lottery Status: </span>
+            <span className={`${betsOpen ? "text-green-600" : "text-red-600"}`}>{betsOpen ? "Open" : "Closed"}</span>
+          </div>
+
+          <div className="w-full">
+            <BuyLotteryToken />
+          </div>
+
+          <div className="flex justify-between w-full p-3 rounded-lg">
+            <div>
+              <span className="font-semibold">Prize for withdraw:</span>
+              <div className="text-lg">{prize}</div>
+            </div>
+            <div>
+              <span className="font-semibold">Prize Pool:</span>
+              <div className="text-lg">{prizePool}</div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 w-full">
+            <button className="btn flex-1" onClick={handleWithdraw}>
+              Withdraw Prize
+            </button>
+            <button className="btn flex-1" onClick={handleBurn}>
+              Burn Token
+            </button>
+          </div>
+
+          {betsOpen && (
+            <div className="flex gap-3 w-full">
+              <button className="btn flex-1 bg-green-700" onClick={handleBet}>
                 Place Bets
               </button>
-              <button className="btn" onClick={handleCloseLottery}>
+              <button className="btn flex-1 bg-red-700" onClick={handleCloseLottery}>
                 Close Lottery
               </button>
             </div>
-          </>
+          )}
+        </div>
+
+        {betsOpen && (
+          <div className="w-2/3 pl-8">
+            <table className="table w-full">
+              <caption className="caption-top">Bets scanned from blocks</caption>
+              <caption className="caption-bottom">plz refresh to view latest transaction</caption>
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>Lottery Contract</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blocks
+                  .flatMap<TransactionWithFunction>(block => block.transactions as TransactionWithFunction[])
+                  .filter(trx => trx.functionName === "bet" && trx.to === lotteryContract?.address.toLowerCase())
+                  .map(trx => {
+                    return (
+                      <tr key={trx.hash}>
+                        <td>{trx.from}</td>
+                        <td>{trx.to}</td>
+                        <td>1</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+            <div className="flex justify-center gap-2 mt-4">
+              <button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 0}
+                className="btn btn-sm"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={BigInt(currentPage) >= totalBlocks - 1n}
+                className="btn btn-sm"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -18,8 +18,8 @@ jobs:
         id: filter
         with:
           filters: |
-            week4: 'week-4/dapp-voting'
-            week5: 'week-5/dapp-lottery'
+            week4: week-4/dapp-voting/**
+            week5: week-5/dapp-lottery/**
       - run: echo "${{ steps.filter.outputs.changes }}"
 
   ci:
@@ -40,24 +40,24 @@ jobs:
         with:
           node-version: lts/*
           cache: yarn
-          cache-dependency-path: ${{ matrix.package }}/yarn.lock
+          cache-dependency-path: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}/yarn.lock"
 
       - name: Install dependencies
         run: yarn install --immutable
-        working-directory: ${{ matrix.package }}
+        working-directory: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}"
 
       - name: Run hardhat node, deploy contracts (& generate contracts typescript output)
         run: yarn chain & yarn deploy
-        working-directory: ${{ matrix.package }}
+        working-directory: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}"
 
       - name: Run hardhat lint
         run: yarn hardhat:lint --max-warnings=0
-        working-directory: ${{ matrix.package }}
+        working-directory: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}"
 
       - name: Run nextjs lint
         run: yarn next:lint --max-warnings=0
-        working-directory: ${{ matrix.package }}
+        working-directory: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}"
 
       - name: Check typings on nextjs
         run: yarn next:check-types
-        working-directory: ${{ matrix.package }}
+        working-directory: "${{ fromJson('{ week4: \"week-4/dapp-voting\", week5: \"week-5/dapp-lottery\" }')[matrix.package] }}"

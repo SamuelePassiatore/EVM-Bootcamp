@@ -1,6 +1,5 @@
 "use client";
 
-import BuyLotteryToken from "./_components/BuyLotteryToken";
 import Lottery from "./_components/Lottery";
 import LotteryAdmin from "./_components/LotteryAdmin";
 import { useAccount } from "wagmi";
@@ -10,17 +9,17 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 const Page = () => {
   const { address: connectedAddress } = useAccount();
 
-  const { data } = useScaffoldReadContract({
+  const { data: owner } = useScaffoldReadContract({
     contractName: "Lottery",
     functionName: "owner",
+  });
+  const { data: paymentToken } = useScaffoldReadContract({
+    contractName: "Lottery",
+    functionName: "paymentToken",
   });
 
   if (!connectedAddress) {
     return <div>Please connect your wallet</div>;
-  }
-
-  if (!process.env.NEXT_PUBLIC_TOKEN_ADDRESS) {
-    throw new Error("missing NEXT_PUBLIC_TOKEN_ADDRESS");
   }
 
   return (
@@ -38,13 +37,15 @@ const Page = () => {
           <div>
             ETH Balances: <Balance address={connectedAddress} useEtherFormat={true} />
           </div>
-          <div>
-            Token Balances: <Balance address={connectedAddress} token={process.env.NEXT_PUBLIC_TOKEN_ADDRESS} />
-          </div>
+          {paymentToken && (
+            <div>
+              Token Balances: <Balance address={connectedAddress} token={paymentToken} />
+            </div>
+          )}
         </div>
       </div>
-      <Lottery address={connectedAddress} />
-      {data == connectedAddress && <LotteryAdmin />}
+      {paymentToken && <Lottery address={connectedAddress} token={paymentToken} />}
+      {owner === connectedAddress && <LotteryAdmin />}
     </div>
   );
 };
