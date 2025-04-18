@@ -51,3 +51,49 @@ interface Question {
       throw error;
     }
   };
+
+  export const updateLastLevel = async (level: number): Promise<{ lastCompletedLevel: number }> => {
+    const API_URL = import.meta.env.VITE_API_URL;
+    
+    if (!API_URL) {
+      throw new Error('MISSING_API_URL');
+    }
+  
+    try {
+      const response = await fetch(`${API_URL}/questions/update-level`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ level })
+      });
+  
+      console.debug('API Request:', {
+        url: `${API_URL}/questions/update-level`,
+        method: 'POST',
+        status: response.status
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({
+          message: await response.text()
+        }));
+        
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+  
+      const data: { lastCompletedLevel: number } = await response.json();
+      return data;
+  
+    } catch (error) {
+      console.error('API Error:', {
+        endpoint: '/questions/update-level',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+      
+      throw error;
+    }
+  };

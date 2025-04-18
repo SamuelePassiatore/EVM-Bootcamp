@@ -1,7 +1,7 @@
 import './App.css';
 import { useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
-import { fetchQuestions } from './services/api';
+import { fetchQuestions, updateLastLevel } from './services/api';
 import Question from './components/Question';
 import { Question as QuestionType } from './types';
 
@@ -22,7 +22,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAnswer = (selectedIndex: number) => {
+  const handleAnswer = async (selectedIndex: number) => {
     const currentQuestion = questions.find(q => q.level === currentLevel);
     if (!currentQuestion) return;
 
@@ -31,10 +31,17 @@ function App() {
     if (isCorrect) {
       const hasNextQuestion = questions.some(q => q.level === currentLevel + 1);
       
-      if (hasNextQuestion) {
-        setTimeout(() => setCurrentLevel(prev => prev + 1), 1000);
-      } else {
-        setHasAnswered(true);
+      try {
+        // Aggiorna l'ultimo livello completato sul backend
+        await updateLastLevel(currentLevel);
+
+        if (hasNextQuestion) {
+          setTimeout(() => setCurrentLevel(prev => prev + 1), 1000);
+        } else {
+          setHasAnswered(true);
+        }
+      } catch (error) {
+        console.error('Failed to update last level:', error);
       }
     }
   };
@@ -44,6 +51,12 @@ function App() {
       try {
         const data = await fetchQuestions();
         setQuestions(data);
+        
+        // Imposta il livello corrente al primo disponibile
+        if (data.length > 0) {
+          const initialLevel = data[0].level;
+          setCurrentLevel(initialLevel);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load questions');
         console.error('API Error:', err);
