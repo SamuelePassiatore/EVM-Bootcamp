@@ -75,11 +75,13 @@ router.post(API.auth.routes.VERIFY, async (req, res) => {
     // save the session with the address and chainId (SIWESession)
     req.session.siwe = { address, chainId: chainIdNum };
     req.session.save(() => res.status(200).send(true));
-  } catch (e) {
-    // clean the session
+  } catch (e: unknown) {
+
     req.session.siwe = null;
     req.session.nonce = null;
-    req.session.save(() => res.status(500).json({ message: e.message }));
+
+    const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
+    req.session.save(() => res.status(500).json({ message: errorMessage }));
   }
 });
 
