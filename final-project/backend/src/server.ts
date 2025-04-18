@@ -1,6 +1,6 @@
-import app from './app.js';
-import connectDB from './lib/mongo.js';
-import dotenv from 'dotenv';
+import app from "./app";
+import connectDB from "./lib/mongo";
+import dotenv from "dotenv";
 
 dotenv.config();
 
