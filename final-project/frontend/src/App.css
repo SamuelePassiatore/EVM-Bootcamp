@@ -266,3 +266,21 @@ body {
   background-color: #4f46e5;
   border-color: #6366f1;
 }
+
+.feedback-message {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.feedback-message.correct {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+}
+
+.feedback-message.incorrect {
+  color: #c62828;
+  background-color: #ffebee;
+}

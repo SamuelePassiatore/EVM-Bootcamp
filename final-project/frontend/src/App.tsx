@@ -111,6 +111,7 @@ function App() {
               level={currentLevel}
               text={questions[currentLevel - 1].text}
               options={questions[currentLevel - 1].options}
+              correctOptionIndex={questions[currentLevel - 1].correctOptionIndex}
               onAnswer={handleAnswer}
             />
           </div>
