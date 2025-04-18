@@ -24,7 +24,7 @@ function App() {
         
         <div className="center-section">
           <div className="app-name">
-            <h1>MyDApp</h1>
+            <h1>QuizChain</h1>
           </div>
         </div>
         
@@ -39,6 +39,24 @@ function App() {
           </div>
         </div>
       </header>
+
+      <main className="main-content">
+        {!isConnected && (
+          <div className="connect-prompt">
+            <h2>Welcome to QuizChain!</h2>
+            <p>Connect your wallet to participate in the game and access all features.</p>
+            <div className="main-connect-button">
+              <appkit-button />
+            </div>
+          </div>
+        )}
+        
+        {isConnected && (
+          <div className="game-content">
+            <p>test</p>
+          </div>
+        )}
+      </main>
     </>
   );
 }
