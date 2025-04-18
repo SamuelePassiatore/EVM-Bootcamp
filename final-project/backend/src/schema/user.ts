@@ -1,9 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 
 interface IUser {
-  username: string;
+  username?: string;
   walletAddress: string;
   createdAt: Date;
+  lastCompletedLevel: number;
 }
 
 const userSchema = new Schema<IUser>({
@@ -15,6 +16,10 @@ const userSchema = new Schema<IUser>({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  lastCompletedLevel: {
+    type: Number,
+    default: 1,
   },
 });
 

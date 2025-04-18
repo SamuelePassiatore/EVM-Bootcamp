@@ -97,8 +97,8 @@ router.post(API.auth.routes.VERIFY, async (req, res) => {
     // clean the session
     req.session.siwe = null;
     req.session.nonce = null;
-    
-    const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
+
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
     req.session.save(() => res.status(500).json({ message: errorMessage }));
   }
 });
