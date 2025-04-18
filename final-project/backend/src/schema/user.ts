@@ -7,12 +7,6 @@ interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
   walletAddress: {
     type: String,
     required: true,
