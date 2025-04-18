@@ -9,7 +9,7 @@ const queryClient = new QueryClient();
 
 const metadata = {
   name: "MyDApp",
-  description: "La mia DApp con AppKit",
+  description: "My Dapp with AppKit",
   url: "http://localhost:5173",
   icons: ["https://www.cryptologos.cc/logos/bitcoin-btc-logo.png?v=040"],
 };

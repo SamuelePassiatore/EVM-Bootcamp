@@ -10,7 +10,7 @@ import { apiUrl, chains, projectId } from "./constants";
 
 if (!projectId) {
   console.warn(
-    "Project ID non definito. AppKit potrebbe non funzionare correttamente.",
+    "Project ID not defined. AppKit may not function correctly.",
   );
 }
 if (!apiUrl) {

@@ -11,28 +11,33 @@ declare global {
 }
 
 function App() {
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   
   return (
     <>
       <header className="header">
-        <div className="logo">
-          <img src="https://www.cryptologos.cc/logos/bitcoin-btc-logo.png?v=040" alt="Logo" />
-        </div>
-        <div className="app-name">
-          <h1>MyDApp</h1>
-        </div>
-        <div className="network-selector">
-          <appkit-network-button />
-        </div>
-        <div className="wallet-connect">
-          <appkit-button />
-        </div>
-        {isConnected && (
-          <div className="connected-info">
-            <p>Connected: {address?.substring(0, 6)}...{address?.substring(address.length - 4)}</p>
+        <div className="left-section">
+          <div className="logo">
+            <img src="https://www.cryptologos.cc/logos/bitcoin-btc-logo.png?v=040" alt="Logo" />
           </div>
-        )}
+        </div>
+        
+        <div className="center-section">
+          <div className="app-name">
+            <h1>MyDApp</h1>
+          </div>
+        </div>
+        
+        <div className="right-section">
+          {isConnected && (
+            <div className="network-selector">
+              <appkit-network-button />
+            </div>
+          )}
+          <div className="wallet-connect">
+            <appkit-button />
+          </div>
+        </div>
       </header>
     </>
   );
