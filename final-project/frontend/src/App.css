@@ -242,3 +242,27 @@ body {
     font-size: 14px;
   }
 }
+
+.next-button {
+  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.next-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+.option-button.selected {
+  background-color: #4f46e5;
+  border-color: #6366f1;
+}
