@@ -8,12 +8,13 @@ import {
 import { createPublicClient, getAddress, http } from "viem";
 import { reownProjectId } from "../constants";
 import { API } from "../shared/endpoints";
+import User from "../schema/user";
 
 const router = express.Router();
 
 declare module "express-session" {
   interface SessionData {
-    siwe: null | { address: string; chainId: number };
+    siwe: null | { address: string; chainId: number; userId?: string };
     nonce: null | string;
   }
 }
@@ -72,14 +73,31 @@ router.post(API.auth.routes.VERIFY, async (req, res) => {
       throw new Error("Invalid chainId");
     }
 
-    // save the session with the address and chainId (SIWESession)
-    req.session.siwe = { address, chainId: chainIdNum };
-    req.session.save(() => res.status(200).send(true));
+    try {
+      let user = await User.findOne({ walletAddress: address });
+      
+      if (!user) {
+        user = new User({
+          walletAddress: address,
+          createdAt: new Date()
+        });
+        await user.save();
+        console.log(`New user created with wallet: ${address}`);
+      }
+      
+      req.session.siwe = { address, chainId: chainIdNum, userId: user._id.toString() };
+      req.session.save(() => res.status(200).send(true));
+    } catch (error) {
+      console.error("Error creating/finding user:", error);
+      req.session.siwe = null;
+      req.session.nonce = null;
+      req.session.save(() => res.status(500).json({ message: "Error processing user data" }));
+    }
   } catch (e: unknown) {
-
+    // clean the session
     req.session.siwe = null;
     req.session.nonce = null;
-
+    
     const errorMessage = e instanceof Error ? e.message : 'Errore sconosciuto';
     req.session.save(() => res.status(500).json({ message: errorMessage }));
   }
