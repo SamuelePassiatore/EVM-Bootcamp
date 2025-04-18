@@ -1,7 +1,9 @@
 import './App.css';
 import { useAccount } from 'wagmi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchQuestions } from './services/api';
 import Question from './components/Question';
+import { Question as QuestionType } from './types';
 
 declare global {
   namespace JSX {
@@ -16,57 +18,64 @@ function App() {
   const { isConnected } = useAccount();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [hasAnswered, setHasAnswered] = useState(false);
-  
-  // Demo questions
-  const questions = [
-    {
-      level: 1,
-      text: "What is a blockchain?",
-      options: [
-        "A centralized database owned by a single company",
-        "A distributed ledger technology that records transactions across multiple computers"
-      ],
-      correctOptionIndex: 1
-    },
-    {
-      level: 2,
-      text: "Which of these is NOT a property of most blockchain systems?",
-      options: [
-        "Data can be easily modified after being recorded",
-        "Transactions are verified by a network of computers"
-      ],
-      correctOptionIndex: 0
-    },
-    {
-      level: 3,
-      text: "What is a smart contract?",
-      options: [
-        "A self-executing contract with the terms directly written into code",
-        "A legal contract written by AI"
-      ],
-      correctOptionIndex: 0
-    }
-  ];
-  
+  const [questions, setQuestions] = useState<QuestionType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const handleAnswer = (selectedIndex: number) => {
-    const currentQuestion = questions[currentLevel - 1];
+    const currentQuestion = questions.find(q => q.level === currentLevel);
+    if (!currentQuestion) return;
+
     const isCorrect = selectedIndex === currentQuestion.correctOptionIndex;
     
-    if (isCorrect && currentLevel < questions.length) {
-      // Move to next question after a delay
-      setTimeout(() => {
-        setCurrentLevel(prev => prev + 1);
-      }, 1000);
-    } else if (isCorrect && currentLevel === questions.length) {
-      // User completed all questions
-      setHasAnswered(true);
-    } else {
-      // Incorrect answer
-      console.log("Incorrect answer!");
-      // You could add logic to retry or restart
+    if (isCorrect) {
+      const hasNextQuestion = questions.some(q => q.level === currentLevel + 1);
+      
+      if (hasNextQuestion) {
+        setTimeout(() => setCurrentLevel(prev => prev + 1), 1000);
+      } else {
+        setHasAnswered(true);
+      }
     }
   };
-  
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const data = await fetchQuestions();
+        setQuestions(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load questions');
+        console.error('API Error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadQuestions();
+  }, []);
+
+  const currentQuestion = questions.find(q => q.level === currentLevel);
+
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Loading questions...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-screen">
+        <h2>Error</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+
   return (
     <>
       <header className="header">
@@ -95,7 +104,7 @@ function App() {
       </header>
 
       <main className="main-content">
-        {!isConnected && (
+        {!isConnected ? (
           <div className="connect-prompt">
             <h2>Welcome to QuizChain!</h2>
             <p>Connect your wallet to participate in the game and access all features.</p>
@@ -103,25 +112,24 @@ function App() {
               <appkit-button />
             </div>
           </div>
-        )}
-        
-        {isConnected && !hasAnswered && (
+        ) : hasAnswered ? (
+          <div className="completion-screen">
+            <h2>Congratulations!</h2>
+            <p>You've completed all questions successfully!</p>
+          </div>
+        ) : currentQuestion ? (
           <div className="game-content">
             <Question 
-              level={currentLevel}
-              text={questions[currentLevel - 1].text}
-              options={questions[currentLevel - 1].options}
-              correctOptionIndex={questions[currentLevel - 1].correctOptionIndex}
+              level={currentQuestion.level}
+              text={currentQuestion.text}
+              options={currentQuestion.options}
+              correctOptionIndex={currentQuestion.correctOptionIndex}
               onAnswer={handleAnswer}
             />
           </div>
-        )}
-        
-        {isConnected && hasAnswered && (
-          <div className="game-content">
-            <h2>Congratulations!</h2>
-            <p>You've completed all questions successfully!</p>
-            <p>Your NFT reward is being processed...</p>
+        ) : (
+          <div className="no-questions">
+            <p>No questions available</p>
           </div>
         )}
       </main>
