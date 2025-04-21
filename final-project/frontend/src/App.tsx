@@ -50,8 +50,6 @@ function App() {
       );
 
       try {
-        // Incrementa il livello quando la risposta è corretta
-        // Passa currentLevel + 1 per aggiornare al livello successivo
         console.log("Updating level from", currentLevel, "to", currentLevel + 1);
         await updateLastLevel(currentLevel + 1);
 
@@ -102,10 +100,8 @@ function App() {
             console.log("Max level:", maxLevel, "User level:", user.questionLevel);
             
             if (user.questionLevel > maxLevel) {
-              // Se l'utente ha già completato tutte le domande
               setHasAnswered(true);
             } else {
-              // Mostra la domanda corrispondente al questionLevel dell'utente
               setCurrentLevel(user.questionLevel);
             }
           }
@@ -130,7 +126,6 @@ function App() {
       setMintSuccess(true);
     } catch (error) {
       console.error("Failed to mint NFT:", error);
-      alert("Failed to mint NFT. Please try again.");
     } finally {
       setIsMinting(false);
     }
@@ -213,7 +208,6 @@ function App() {
             ) : (
               <div className="mint-success">
                 <p>NFT successfully minted! 🎉</p>
-                <p>Check your wallet to see your new QuizChain achievement NFT.</p>
               </div>
             )}
           </div>

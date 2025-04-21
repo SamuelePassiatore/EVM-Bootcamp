@@ -1,6 +1,7 @@
 import express from "express";
 import { nftContractAddress, ownerPrivateKey, chain } from "../constants";
 import NFTRewardService from "../services/NFTRewardService";
+import User from "../schema/user";
 import { isAuthenticated } from "../middlewares/auth";
 const router = express.Router();
 
@@ -13,14 +14,23 @@ const nftRewardService = new NFTRewardService(
 // only for testing
 // example: http://localhost:8001/testing/redeem?userId=XXX&level=1
 router.post("/redeem", isAuthenticated, async (req, res) => {
-  const { level } = req.query;
-  const userId = req.session.siwe?.userId!;
-  const reward = await nftRewardService.rewardNFT(
-    userId as string,
-    Number(level),
-  );
-
-  res.json(reward);
+    const { level } = req.query;
+    const userId = req.session.siwe?.userId!;
+    
+    const reward = await nftRewardService.rewardNFT(
+      userId as string,
+      Number(level),
+    );
+    
+    await User.findByIdAndUpdate(
+      userId,
+      { mintedNFT: true },
+      { new: true }
+    );
+    
+    console.log(`User ${userId} has minted an NFT for level ${level}`);
+    
+    res.json(reward);
 });
 
 // example: http://localhost:8001/testing/rewards?userId=XXX

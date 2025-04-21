@@ -15,6 +15,10 @@ const userSchema = new Schema<IUser>({
     type: Number,
     default: 1,
   },
+  mintedNFT: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const User = mongoose.model("User", userSchema);

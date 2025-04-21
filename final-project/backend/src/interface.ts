@@ -13,6 +13,7 @@ export interface IUser {
   walletAddress: string;
   createdAt: Date;
   questionLevel: number;
+  mintedNFT: boolean;
 }
 
 export interface IQuestion {
