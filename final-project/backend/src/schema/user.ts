@@ -11,7 +11,7 @@ const userSchema = new Schema<IUser>({
     type: Date,
     default: Date.now,
   },
-  lastCompletedLevel: {
+  questionLevel: {
     type: Number,
     default: 1,
   },

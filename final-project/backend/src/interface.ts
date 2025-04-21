@@ -12,7 +12,7 @@ export interface IUser {
   username?: string;
   walletAddress: string;
   createdAt: Date;
-  lastCompletedLevel: number;
+  questionLevel: number;
 }
 
 export interface IQuestion {

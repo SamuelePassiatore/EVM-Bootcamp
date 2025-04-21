@@ -1,7 +1,13 @@
 import "./App.css";
 import { useAccount } from "wagmi";
 import { useState, useEffect } from "react";
-import { fetchQuestions, updateLastLevel, mintNFT } from "./services/api";
+import { 
+  fetchQuestions, 
+  updateLastLevel, 
+  mintNFT, 
+  fetchUserData,
+  UserData 
+} from "./services/api";
 import Question from "./components/Question";
 import { Question as QuestionType } from "./types";
 import { Rewards } from "./components/Rewards";
@@ -30,6 +36,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const handleAnswer = async (selectedIndex: number) => {
     const currentQuestion = questions.find((q) => q.level === currentLevel);
@@ -43,7 +50,6 @@ function App() {
       );
 
       try {
-        // Aggiorna l'ultimo livello completato sul backend
         await updateLastLevel(currentLevel);
 
         if (hasNextQuestion) {
@@ -80,6 +86,35 @@ function App() {
     loadQuestions();
   }, []);
 
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (isConnected && questions.length > 0) {
+        try {
+          const user = await fetchUserData();
+          setUserData(user);
+          
+          if (user.questionLevel) {
+            const maxLevel = Math.max(...questions.map(q => q.level));
+            
+            if (user.questionLevel >= maxLevel) {
+              setHasAnswered(true);
+            } else {
+
+              setCurrentLevel(user.questionLevel + 1);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load user data:", error);
+
+        }
+      } else {
+        setUserData(null);
+      }
+    };
+
+    loadUserData();
+  }, [isConnected, questions]);
+
   const handleMintNFT = async () => {
     setIsMinting(true);
     try {
@@ -90,6 +125,7 @@ function App() {
       setMintSuccess(true);
     } catch (error) {
       console.error("Failed to mint NFT:", error);
+      alert("Failed to mint NFT. Please try again.");
     } finally {
       setIsMinting(false);
     }

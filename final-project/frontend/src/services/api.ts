@@ -10,6 +10,13 @@ interface Question {
   __v?: number;
 }
 
+export interface UserData {
+  id: string;
+  walletAddress: string;
+  createdAt: string;
+  questionLevel: number;
+}
+
 export const fetchQuestions = async (): Promise<Question[]> => {
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -99,7 +106,7 @@ export const fetchRewards = async (): Promise<INFTReward[]> => {
 
 export const updateLastLevel = async (
   level: number,
-): Promise<{ lastCompletedLevel: number }> => {
+): Promise<{ questionLevel: number }> => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   if (!API_URL) {
@@ -131,7 +138,7 @@ export const updateLastLevel = async (
       throw new Error(errorData.message || `HTTP ${response.status}`);
     }
 
-    const data: { lastCompletedLevel: number } = await response.json();
+    const data: { questionLevel: number } = await response.json();
     return data;
   } catch (error) {
     console.error("API Error:", {
@@ -180,6 +187,49 @@ export const mintNFT = async (level: number): Promise<any> => {
   } catch (error) {
     console.error("API Error:", {
       endpoint: "/nft/redeem",
+      error: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+    });
+
+    throw error;
+  }
+};
+
+export const fetchUserData = async (): Promise<UserData> => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  if (!API_URL) {
+    throw new Error("MISSING_API_URL");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/questions/user-data`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    console.debug("API Request:", {
+      url: `${API_URL}/questions/user-data`,
+      method: "GET",
+      status: response.status,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(async () => ({
+        message: await response.text(),
+      }));
+
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    const data: UserData = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API Error:", {
+      endpoint: "/questions/user-data",
       error: error instanceof Error ? error.message : "Unknown error",
       timestamp: new Date().toISOString(),
     });
