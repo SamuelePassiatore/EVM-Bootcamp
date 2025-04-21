@@ -1,7 +1,7 @@
 import "./App.css";
 import { useAccount } from "wagmi";
 import { useState, useEffect } from "react";
-import { fetchQuestions, updateLastLevel } from "./services/api";
+import { fetchQuestions, updateLastLevel, mintNFT } from "./services/api";
 import Question from "./components/Question";
 import { Question as QuestionType } from "./types";
 import { Rewards } from "./components/Rewards";
@@ -28,6 +28,8 @@ function App() {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMinting, setIsMinting] = useState(false);
+  const [mintSuccess, setMintSuccess] = useState(false);
 
   const handleAnswer = async (selectedIndex: number) => {
     const currentQuestion = questions.find((q) => q.level === currentLevel);
@@ -61,7 +63,6 @@ function App() {
         const data = await fetchQuestions();
         setQuestions(data);
 
-        // Imposta il livello corrente al primo disponibile
         if (data.length > 0) {
           const initialLevel = data[0].level;
           setCurrentLevel(initialLevel);
@@ -78,6 +79,21 @@ function App() {
 
     loadQuestions();
   }, []);
+
+  const handleMintNFT = async () => {
+    setIsMinting(true);
+    try {
+      // Call the backend API to mint the NFT with the current level
+      const result = await mintNFT(currentLevel);
+      console.log("NFT minted successfully:", result);
+      
+      setMintSuccess(true);
+    } catch (error) {
+      console.error("Failed to mint NFT:", error);
+    } finally {
+      setIsMinting(false);
+    }
+  };
 
   const currentQuestion = questions.find((q) => q.level === currentLevel);
 
@@ -144,6 +160,21 @@ function App() {
           <div className="completion-screen">
             <h2>Congratulations!</h2>
             <p>You've completed all questions successfully!</p>
+            
+            {!mintSuccess ? (
+              <button 
+                className="mint-nft-button" 
+                onClick={handleMintNFT}
+                disabled={isMinting}
+              >
+                {isMinting ? "MINTING..." : "MINT NFT"}
+              </button>
+            ) : (
+              <div className="mint-success">
+                <p>NFT successfully minted! 🎉</p>
+                <p>Check your wallet to see your new QuizChain achievement NFT.</p>
+              </div>
+            )}
           </div>
         ) : currentQuestion ? (
           <>

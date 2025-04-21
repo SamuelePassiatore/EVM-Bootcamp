@@ -31,7 +31,7 @@ export default class NFTService {
     chain: Chain,
   ) {
     this.contractAddress = _contractAddress;
-    this.ownerPrivateKey = _ownerPrivateKey;
+    this.ownerPrivateKey = _ownerPrivateKey as `0x${string}`;
     this.publicClient = createPublicClient({ chain: chain, transport: http() });
     this.walletClient = createWalletClient({ chain: chain, transport: http() });
   }
@@ -43,7 +43,7 @@ export default class NFTService {
     if (!user) {
       throw new Error("User not found");
     }
-    const account = privateKeyToAccount(stringToHex(this.ownerPrivateKey));
+    const account = privateKeyToAccount(this.ownerPrivateKey as `0x${string}`);
     const { request, result } = await this.publicClient.simulateContract({
       account,
       address: getAddress(this.contractAddress),

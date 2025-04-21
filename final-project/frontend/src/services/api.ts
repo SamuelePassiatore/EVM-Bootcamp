@@ -52,6 +52,7 @@ export const fetchQuestions = async (): Promise<Question[]> => {
     throw error;
   }
 };
+
 export const fetchRewards = async (): Promise<INFTReward[]> => {
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -135,6 +136,50 @@ export const updateLastLevel = async (
   } catch (error) {
     console.error("API Error:", {
       endpoint: "/questions/update-level",
+      error: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+    });
+
+    throw error;
+  }
+};
+
+export const mintNFT = async (level: number): Promise<any> => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  if (!API_URL) {
+    throw new Error("MISSING_API_URL");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/nft/redeem?level=${level}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    console.debug("API Request:", {
+      url: `${API_URL}/nft/redeem?level=${level}`,
+      method: "POST",
+      status: response.status,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(async () => ({
+        message: await response.text(),
+      }));
+
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API Error:", {
+      endpoint: "/nft/redeem",
       error: error instanceof Error ? error.message : "Unknown error",
       timestamp: new Date().toISOString(),
     });
