@@ -50,7 +50,10 @@ function App() {
       );
 
       try {
-        await updateLastLevel(currentLevel);
+        // Incrementa il livello quando la risposta è corretta
+        // Passa currentLevel + 1 per aggiornare al livello successivo
+        console.log("Updating level from", currentLevel, "to", currentLevel + 1);
+        await updateLastLevel(currentLevel + 1);
 
         if (hasNextQuestion) {
           setTimeout(() => setCurrentLevel((prev) => prev + 1), 1000);
@@ -58,7 +61,7 @@ function App() {
           setHasAnswered(true);
         }
       } catch (error) {
-        console.error("Failed to update last level:", error);
+        console.error("Failed to update level:", error);
       }
     }
   };
@@ -92,20 +95,22 @@ function App() {
         try {
           const user = await fetchUserData();
           setUserData(user);
+          console.log("User data loaded:", user);
           
-          if (user.questionLevel) {
+          if (user.questionLevel !== undefined && user.questionLevel !== null) {
             const maxLevel = Math.max(...questions.map(q => q.level));
+            console.log("Max level:", maxLevel, "User level:", user.questionLevel);
             
-            if (user.questionLevel >= maxLevel) {
+            if (user.questionLevel > maxLevel) {
+              // Se l'utente ha già completato tutte le domande
               setHasAnswered(true);
             } else {
-
-              setCurrentLevel(user.questionLevel + 1);
+              // Mostra la domanda corrispondente al questionLevel dell'utente
+              setCurrentLevel(user.questionLevel);
             }
           }
         } catch (error) {
           console.error("Failed to load user data:", error);
-
         }
       } else {
         setUserData(null);
