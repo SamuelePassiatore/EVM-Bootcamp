@@ -14,6 +14,8 @@ export interface IUser {
   createdAt: Date;
   questionLevel: number;
   mintedNFT: boolean;
+  isBlocked?: boolean;
+  lastWrongAnswerTime?: Date | null;
 }
 
 export interface IQuestion {

@@ -18,6 +18,14 @@ const userSchema = new Schema<IUser>({
   mintedNFT: {
     type: Boolean,
     default: false
+  },
+  lastWrongAnswerTime: {
+    type: Date,
+    default: null
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
   }
 });
 

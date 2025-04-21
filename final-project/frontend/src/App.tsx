@@ -38,6 +38,10 @@ function App() {
   const [mintSuccess, setMintSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   const handleAnswer = async (selectedIndex: number) => {
     const currentQuestion = questions.find((q) => q.level === currentLevel);
     if (!currentQuestion) return;
@@ -156,9 +160,9 @@ function App() {
     <>
       <header className="header">
         <div className="left-section">
-          <div className="logo">
+          <div className="logo" onClick={handleRefresh} style={{ cursor: 'pointer' }}>
             <img
-              src="https://www.cryptologos.cc/logos/bitcoin-btc-logo.png?v=040"
+              src="/quiz.png"
               alt="Logo"
             />
           </div>
