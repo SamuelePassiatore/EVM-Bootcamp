@@ -103,6 +103,8 @@ Complete the following content to the `.env` file:
 MONGODB_URI=
 PORT=
 REOWN_PROJECT_ID=
+NFT_CONTRACT_HARDHAT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+DEFAULT_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
 With the following values:
@@ -110,6 +112,11 @@ With the following values:
 - The MongoDB URI with your actual connection string
 - Your REOWN project ID with a project ID from [reown.xyz](https://reown.xyz/) (you can use any placeholder for now if you don't have one)
 - The port number (default is `8001`)
+
+**Note**:
+
+- The `NFT_CONTRACT_HARDHAT_ADDRESS` is the address of the deployed contract on the local Hardhat network. You can leave it as is for now, as it will be updated after deploying the contract.
+- The `DEFAULT_PRIVATE_KEY` is the private key of the first account from the Hardhat node.
 
 ### 2. Frontend Configuration
 
@@ -170,6 +177,8 @@ npx hardhat node
 
 This will start a local Ethereum network and print out several test accounts with private keys.
 
+In MetaMask, you can import one of these accounts using the private key and use it for testing on the Hardat network.
+
 ### 2. Deploy the Contract
 
 In another terminal:
@@ -180,6 +189,8 @@ npx hardhat run scripts/deploy.ts --network localhost
 ```
 
 You should see a success message with the contract address. **Note this address** for future reference.
+
+The contract will be deployed to the local Hardhat network. Note that the deployment script uses the `Account #0` from the Hardhat node, which is the first account listed when you start the local blockchain.
 
 ## Testing the Application
 
