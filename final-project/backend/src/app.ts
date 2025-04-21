@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import router from "./routes/index";
 import { router as authRouter } from "./routes/auth";
 import questionRouter from "./routes/question";
+import nftRewardRouter from "./routes/nftReward";
+import testingRouter from "./routes/testing";
 import Session from "express-session";
-import { isAuthenticated } from "./middlewares/auth";
-
-dotenv.config();
 
 const app = express();
 
@@ -22,12 +20,14 @@ app.use(
     resave: true,
     saveUninitialized: true,
     cookie: { secure: false, sameSite: "lax" },
-  })
+  }),
 );
 
 // Routes
 app.use("/", router);
 app.use("/auth", authRouter);
 app.use("/questions", questionRouter);
+app.use("/testing", testingRouter);
+app.use("/nft", nftRewardRouter);
 
 export default app;

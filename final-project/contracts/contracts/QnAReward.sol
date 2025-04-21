@@ -17,7 +17,8 @@ contract QnAReward is ERC721, ERC721URIStorage, Ownable {
         address to,
         string memory uri
     ) public onlyOwner returns (uint256) {
-        uint256 tokenId = _nextTokenId++;
+        uint256 tokenId = _nextTokenId;
+        _nextTokenId = _nextTokenId + 1;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         return tokenId;

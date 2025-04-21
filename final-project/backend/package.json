@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@multiavatar/multiavatar": "^1.0.7",
     "@reown/appkit-siwe": "^1.7.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

@@ -1,11 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
-interface IUser {
-  username?: string;
-  walletAddress: string;
-  createdAt: Date;
-  lastCompletedLevel: number;
-}
+import { IUser } from "../interface";
 
 const userSchema = new Schema<IUser>({
   walletAddress: {
