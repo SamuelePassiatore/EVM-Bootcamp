@@ -1,12 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
-interface IQuestion {
-  level: number;
-  text: string;
-  options: string[];
-  correctOptionIndex: number;
-  createdAt: Date;
-}
+import { IQuestion } from "../interface";
 
 const questionSchema = new Schema<IQuestion>({
   level: {

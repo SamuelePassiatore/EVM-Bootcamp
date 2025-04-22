@@ -1,11 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
-interface IUser {
-  username?: string;
-  walletAddress: string;
-  createdAt: Date;
-  lastCompletedLevel: number;
-}
+import { IUser } from "../interface";
 
 const userSchema = new Schema<IUser>({
   walletAddress: {
@@ -17,10 +11,22 @@ const userSchema = new Schema<IUser>({
     type: Date,
     default: Date.now,
   },
-  lastCompletedLevel: {
+  questionLevel: {
     type: Number,
     default: 1,
   },
+  mintedNFT: {
+    type: Boolean,
+    default: false
+  },
+  lastWrongAnswerTime: {
+    type: Date,
+    default: null
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const User = mongoose.model("User", userSchema);

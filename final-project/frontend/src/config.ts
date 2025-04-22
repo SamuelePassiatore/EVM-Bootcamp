@@ -1,5 +1,4 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet, sepolia } from "@reown/appkit/networks";
 import {
   type SIWECreateMessageArgs,
   createSIWEConfig,
@@ -9,15 +8,13 @@ import { getSession, signOut, verifyMessage, getNonce } from "./utils/auth";
 import { apiUrl, chains, projectId } from "./constants";
 
 if (!projectId) {
-  console.warn(
-    "Project ID not defined. AppKit may not function correctly.",
-  );
+  console.warn("Project ID not defined. AppKit may not function correctly.");
 }
 if (!apiUrl) {
   console.warn("Missing VITE_API_URL.");
 }
 
-export const networks = [mainnet, sepolia];
+export const networks = chains;
 
 export const wagmiAdapter = new WagmiAdapter({
   networks,
