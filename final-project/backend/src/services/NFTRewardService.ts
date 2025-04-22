@@ -43,27 +43,42 @@ export default class NFTService {
     if (!user) {
       throw new Error("User not found");
     }
+  
     const account = privateKeyToAccount(this.ownerPrivateKey as `0x${string}`);
+  
+    const metadata = {
+      name: `Level ${level} Achievement`,
+      description: "NFT Reward for reaching level " + level,
+      image: `data:image/svg+xml;utf8,${encodeURIComponent(avatar)}`,
+    };
+  
+    const tokenUri = `data:application/json,${encodeURIComponent(
+      JSON.stringify(metadata),
+    )}`;
+  
     const { request, result } = await this.publicClient.simulateContract({
       account,
       address: getAddress(this.contractAddress),
       abi: contractJson.abi,
       functionName: "safeMint",
-      args: [user.walletAddress, avatarString],
+      args: [user.walletAddress, tokenUri],
     });
+  
     const trxHash = await this.walletClient.writeContract(request);
     await this.publicClient.waitForTransactionReceipt({ hash: trxHash });
+  
     const reward = await NFTReward.insertOne({
       level,
       svgCode: avatar,
       tokenId: result,
       userId,
-      name: avatarString,
-      description: "nft reward",
+      name: metadata.name,
+      description: metadata.description,
     });
-
+  
     return reward;
   }
+  
 
   async allNFTs(userId: string) {
     const nfts = await NFTReward.find({ userId });
