@@ -39,9 +39,7 @@ router.post('/mint-reward', async (req, res) => {
         
     } catch (error) {
         console.error('Error minting NFT reward:', error);
-        res.status(500).json({
-        message: error instanceof Error ? error.message : 'Error minting NFT reward'
-        });
+        res.status(500).json({ message: 'Error minting NFT reward' });
     }
 });
 

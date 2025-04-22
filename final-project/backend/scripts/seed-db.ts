@@ -33,10 +33,46 @@ const seedQuestions = async () => {
       ],
       correctOptionIndex: 0,
     },
+    {
+      level: 4,
+      text: "What is a 'gas fee' in Ethereum?",
+      options: [
+        "A fee charged by gas stations to fuel mining equipment",
+        "The cost required to perform a transaction on the Ethereum blockchain"
+      ],
+      correctOptionIndex: 1,
+    },
+    {
+      level: 5,
+      text: "What is the primary purpose of a cryptocurrency wallet?",
+      options: [
+        "To physically store digital coins",
+        "To securely store private keys that give access to your cryptocurrency"
+      ],
+      correctOptionIndex: 1,
+    },
+    {
+      level: 6,
+      text: "What does DeFi stand for?",
+      options: [
+        "Decentralized Finance",
+        "Digital Financial Instruments"
+      ],
+      correctOptionIndex: 0,
+    },
+    {
+      level: 7,
+      text: "What is the purpose of consensus mechanisms in blockchain?",
+      options: [
+        "To reach agreement on transaction data without a central authority",
+        "To verify user identities before allowing transactions"
+      ],
+      correctOptionIndex: 0,
+    }
   ];
 
   await Question.insertMany(fixedQuestions);
-  console.log("✅ 3 questions successfully saved!");
+  console.log("✅ 7 questions successfully saved!");
 };
 const seedUsers = async () => {
   await User.deleteMany();

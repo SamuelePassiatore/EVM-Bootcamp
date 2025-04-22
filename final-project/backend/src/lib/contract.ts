@@ -1,5 +1,3 @@
-// src/lib/blockchain/contract.ts
-
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { hardhat } from 'viem/chains';
@@ -34,7 +32,7 @@ export async function mintNFTReward(walletAddress: string, level: number): Promi
         console.log(`Minting NFT for wallet ${walletAddress} at level ${level}`);
         
         // Create token URI with level info
-        const tokenURI = `http://localhost:5173/metadata/${level}.json`; 
+        const tokenURI = `http://localhost:5173/metadata/${level}.json`;
         
         // Call mint function on the contract
         const hash = await walletClient.writeContract({

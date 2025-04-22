@@ -6,19 +6,12 @@ import {
   getAddress,
   createWalletClient,
   Chain,
-  stringToHex,
 } from "viem";
 import NFTReward from "../schema/NFTReward";
 import User from "../schema/user";
 import multiavatar from "@multiavatar/multiavatar";
 import * as contractJson from "../shared/artifacts/contracts/QnAReward.sol/QnAReward.json";
 import { privateKeyToAccount } from "viem/accounts";
-
-type NFTMetadata = {
-  name: string;
-  description: string;
-  image: string;
-};
 
 export default class NFTService {
   contractAddress: string;
@@ -37,63 +30,68 @@ export default class NFTService {
   }
 
   async rewardNFT(userId: string, level: number) {
+    // Generate a consistent avatar based on user ID and level
     const avatarString = `userId: ${userId} level: ${level}`;
     const avatar = multiavatar(avatarString);
+    
+    // Find the user
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
-  
+    
+    // Set up the account for contract interaction
     const account = privateKeyToAccount(this.ownerPrivateKey as `0x${string}`);
-  
-    const metadata = {
-      name: `Level ${level} Achievement`,
-      description: "NFT Reward for reaching level " + level,
-      image: `data:image/svg+xml;utf8,${encodeURIComponent(avatar)}`,
-    };
-  
-    const tokenUri = `data:application/json,${encodeURIComponent(
-      JSON.stringify(metadata),
-    )}`;
-  
+    
+    // Simulate the contract call first
     const { request, result } = await this.publicClient.simulateContract({
       account,
       address: getAddress(this.contractAddress),
       abi: contractJson.abi,
       functionName: "safeMint",
-      args: [user.walletAddress, tokenUri],
+      args: [user.walletAddress, avatarString],
     });
-  
+    
+    // Execute the actual transaction
     const trxHash = await this.walletClient.writeContract(request);
+    
+    // Wait for transaction confirmation
     await this.publicClient.waitForTransactionReceipt({ hash: trxHash });
-  
-    const reward = await NFTReward.insertOne({
+    
+    // Create a new NFT reward in the database
+    const newReward = new NFTReward({
       level,
       svgCode: avatar,
-      tokenId: result,
+      tokenId: String(result),
       userId,
-      name: metadata.name,
-      description: metadata.description,
+      name: `Level ${level} Reward`,
+      description: `NFT reward for completing level ${level}`,
     });
-  
-    return reward;
+    
+    // Save the new reward
+    await newReward.save();
+    
+    // Update user to mark NFT as minted
+    await User.findByIdAndUpdate(userId, { mintedNFT: true });
+    
+    return newReward;
   }
-  
 
   async allNFTs(userId: string) {
     const nfts = await NFTReward.find({ userId });
     return nfts;
   }
+  
   async getNftMetadata(tokenId: string) {
     const nft = await NFTReward.findOne({ tokenId });
     if (!nft) {
       return null;
     }
-    const metadata: NFTMetadata = {
+    
+    return {
       name: nft.name,
       description: nft.description,
       image: nft.svgCode,
     };
-    return metadata;
   }
 }
