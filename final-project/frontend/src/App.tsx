@@ -1,16 +1,19 @@
 import "./App.css";
 import { useAccount } from "wagmi";
 import { useState, useEffect } from "react";
-import { 
-  fetchQuestions, 
-  updateLastLevel, 
-  mintNFT, 
+import {
+  fetchQuestions,
+  updateLastLevel,
+  mintNFT,
   fetchUserData,
-  UserData 
+  fetchRewards,
+  UserData
 } from "./services/api";
 import Question from "./components/Question";
 import { Question as QuestionType } from "./types";
 import { Rewards } from "./components/Rewards";
+import ProgressBar from "./components/ProgressBar";
+import NFTDisplay from "./components/NFTDisplay";
 
 declare global {
   namespace JSX {
@@ -37,6 +40,9 @@ function App() {
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isMintingAnimating, setIsMintingAnimating] = useState(false);
+  const [mintedNFT, setMintedNFT] = useState<any>(null);
+  const [nftPreview, setNftPreview] = useState<string>("");
 
   const handleRefresh = () => {
     window.location.reload();
@@ -45,28 +51,47 @@ function App() {
   const handleAnswer = async (selectedIndex: number) => {
     const currentQuestion = questions.find((q) => q.level === currentLevel);
     if (!currentQuestion) return;
-
+  
     const isCorrect = selectedIndex === currentQuestion.correctOptionIndex;
-
+  
     if (isCorrect) {
-      const hasNextQuestion = questions.some(
-        (q) => q.level === currentLevel + 1,
-      );
-
       try {
-        console.log("Updating level from", currentLevel, "to", currentLevel + 1);
-        await updateLastLevel(currentLevel + 1);
-
+        const nextLevel = currentLevel + 1;
+        console.log("Updating level from", currentLevel, "to", nextLevel);
+        
+        // Update user progress in the backend
+        await updateLastLevel(nextLevel);
+        
+        // Check if there's a next question
+        const hasNextQuestion = questions.some(q => q.level === nextLevel);
+        
         if (hasNextQuestion) {
-          setTimeout(() => setCurrentLevel((prev) => prev + 1), 1000);
+          console.log("Moving to next level:", nextLevel);
+          setCurrentLevel(nextLevel); // This will trigger a re-render with the new question
         } else {
-          setHasAnswered(true);
+          console.log("No more questions, marking as completed");
+          setHasAnswered(true); // Show completion screen
         }
       } catch (error) {
         console.error("Failed to update level:", error);
       }
     }
   };
+
+  // Generate NFT preview based on current level and user ID
+  useEffect(() => {
+    if (userData && userData.id) {
+      // This would ideally come from the backend
+      // But for simplicity, we'll use the multiavatar library if available
+      import('@multiavatar/multiavatar').then(multiavatar => {
+        const avatarString = `userId: ${userData.id} level: ${currentLevel}`;
+        const avatarSvg = multiavatar.default(avatarString);
+        setNftPreview(avatarSvg);
+      }).catch(() => {
+        console.log("Multiavatar library not available client-side");
+      });
+    }
+  }, [currentLevel, userData]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -122,16 +147,23 @@ function App() {
 
   const handleMintNFT = async () => {
     setIsMinting(true);
+    setIsMintingAnimating(true);
     try {
       // Call the backend API to mint the NFT with the current level
       const result = await mintNFT(currentLevel);
       console.log("NFT minted successfully:", result);
+      
+      // Fetch the newly minted NFT
+      const rewards = await fetchRewards();
+      const latestNFT = rewards.find(r => r.level === currentLevel);
+      setMintedNFT(latestNFT);
       
       setMintSuccess(true);
     } catch (error) {
       console.error("Failed to mint NFT:", error);
     } finally {
       setIsMinting(false);
+      setTimeout(() => setIsMintingAnimating(false), 1500);
     }
   };
 
@@ -202,21 +234,39 @@ function App() {
             <p>You've completed all questions successfully!</p>
             
             {!mintSuccess ? (
-              <button 
-                className="mint-nft-button" 
-                onClick={handleMintNFT}
-                disabled={isMinting}
-              >
-                {isMinting ? "MINTING..." : "MINT NFT"}
-              </button>
+              <>
+                <NFTDisplay
+                  level={currentLevel}
+                  svgCode={nftPreview}
+                  isPreview={true}
+                />
+                
+                <button
+                  className={`mint-nft-button ${isMintingAnimating ? 'minting-animation' : ''}`}
+                  onClick={handleMintNFT}
+                  disabled={isMinting}
+                >
+                  {isMinting ? "MINTING..." : "MINT NFT"}
+                </button>
+              </>
             ) : (
               <div className="mint-success">
                 <p>NFT successfully minted! 🎉</p>
+                {mintedNFT && (
+                  <div className="nft-preview" dangerouslySetInnerHTML={{ __html: mintedNFT.svgCode }} />
+                )}
               </div>
             )}
           </div>
         ) : currentQuestion ? (
-          <>
+          <div className="game-container">
+            {questions.length > 0 && (
+              <ProgressBar 
+                currentLevel={currentLevel}
+                totalLevels={questions.length}
+              />
+            )}
+            
             <div className="game-content">
               <Question
                 level={currentQuestion.level}
@@ -226,10 +276,19 @@ function App() {
                 onAnswer={handleAnswer}
               />
             </div>
-            <div className="game-content">
-              <Rewards />
+            
+            <div className="nft-preview-section">
+              {nftPreview && (
+                <NFTDisplay
+                  level={currentLevel}
+                  svgCode={nftPreview}
+                  isPreview={true}
+                />
+              )}
             </div>
-          </>
+            
+            <Rewards />
+          </div>
         ) : (
           <div className="no-questions">
             <p>No questions available</p>

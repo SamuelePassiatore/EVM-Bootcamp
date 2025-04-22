@@ -15,6 +15,13 @@ const Question: React.FC<QuestionProps> = ({ level, text, options, correctOption
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
   const [blockedUntil, setBlockedUntil] = useState<Date | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [showNextButton, setShowNextButton] = useState<boolean>(false);
+  
+  useEffect(() => {
+    setSelectedOption(null);
+    setFeedback(null);
+    setShowNextButton(false);
+  }, [level]);
   
   useEffect(() => {
     const storedBlockData = localStorage.getItem('questionBlock');
@@ -59,45 +66,46 @@ const Question: React.FC<QuestionProps> = ({ level, text, options, correctOption
   
   const handleOptionClick = (index: number) => {
     if (isBlocked) return;
-    
     setSelectedOption(index);
-    setFeedback(null);
   };
   
-  const handleNextClick = async () => {
-    if (selectedOption !== null) {
-      const isCorrect = selectedOption === correctOptionIndex;
-      setFeedback({
-        message: isCorrect ? "Correct answer! 🎉" : "Wrong answer, try again! ❌",
-        isCorrect
-      });
-      
-      if (isCorrect) {
-        setTimeout(() => {
-          onAnswer(selectedOption);
-          setSelectedOption(null);
-          setFeedback(null);
-        }, 1000);
-      } else {
-        try {
-          // Report wrong answer to the backend
-          await reportWrongAnswer();
-          
-          const now = new Date();
-          const blockDuration = 60000;
-          const endTime = new Date(now.getTime() + blockDuration);
-          
-          localStorage.setItem('questionBlock', JSON.stringify({
-            blockedUntil: endTime.toISOString()
-          }));
-          
-          setIsBlocked(true);
-          setBlockedUntil(endTime);
-        } catch (error) {
-          console.error("Failed to handle wrong answer:", error);
-        }
+  const handleSubmitClick = async () => {
+    if (selectedOption === null) return;
+    
+    const isCorrect = selectedOption === correctOptionIndex;
+    setFeedback({
+      message: isCorrect ? "Correct answer! 🎉" : "Wrong answer, try again! ❌",
+      isCorrect
+    });
+    
+    if (isCorrect) {
+      setShowNextButton(true);
+    } else {
+      try {
+        // Report wrong answer to the backend
+        await reportWrongAnswer();
+        
+        const now = new Date();
+        const blockDuration = 60000; // 1 minute
+        const endTime = new Date(now.getTime() + blockDuration);
+        
+        localStorage.setItem('questionBlock', JSON.stringify({
+          blockedUntil: endTime.toISOString()
+        }));
+        
+        setIsBlocked(true);
+        setBlockedUntil(endTime);
+      } catch (error) {
+        console.error("Failed to handle wrong answer:", error);
       }
     }
+  };
+  
+  const handleNextClick = () => {
+    onAnswer(selectedOption!);
+    setSelectedOption(null);
+    setFeedback(null);
+    setShowNextButton(false);
   };
   
   const formatTime = (seconds: number) => {
@@ -127,6 +135,7 @@ const Question: React.FC<QuestionProps> = ({ level, text, options, correctOption
                 key={index}
                 className={`option-button ${selectedOption === index ? 'selected' : ''}`}
                 onClick={() => handleOptionClick(index)}
+                disabled={showNextButton}
               >
                 {option}
               </button>
@@ -139,9 +148,15 @@ const Question: React.FC<QuestionProps> = ({ level, text, options, correctOption
             </div>
           )}
           
-          {selectedOption !== null && (
-            <button className="next-button" onClick={handleNextClick}>
+          {selectedOption !== null && !showNextButton && (
+            <button className="submit-button" onClick={handleSubmitClick}>
               Submit Answer
+            </button>
+          )}
+          
+          {showNextButton && (
+            <button className="next-button" onClick={handleNextClick}>
+              Next Question
             </button>
           )}
         </>
