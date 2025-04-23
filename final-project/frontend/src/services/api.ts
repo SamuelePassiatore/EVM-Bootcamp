@@ -134,7 +134,7 @@ export const updateLastLevel = async (
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
     const data: { questionLevel: number } = await response.json();
@@ -178,7 +178,7 @@ export const mintNFT = async (level: number): Promise<any> => {
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
     const data = await response.json();
@@ -221,7 +221,7 @@ export const fetchUserData = async (): Promise<UserData> => {
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
     const data: UserData = await response.json();
@@ -259,7 +259,7 @@ export const reportWrongAnswer = async (): Promise<any> => {
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
     const data = await response.json();
@@ -269,3 +269,73 @@ export const reportWrongAnswer = async (): Promise<any> => {
     throw error;
   }
 };
+
+export async function fetchRecentPlayers(): Promise<any[]> {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  if (!API_URL) {
+    throw new Error("MISSING_API_URL");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/users/recent`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(async () => ({
+        message: await response.text(),
+      }));
+
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API Error:", {
+      endpoint: "/users/recent",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return [];
+  }
+}
+
+export async function fetchRecentActivity(): Promise<any[]> {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  if (!API_URL) {
+    throw new Error("MISSING_API_URL");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/activity/recent`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(async () => ({
+        message: await response.text(),
+      }));
+
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API Error:", {
+      endpoint: "/activity/recent",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return [];
+  }
+}

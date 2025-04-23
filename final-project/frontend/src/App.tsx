@@ -1,3 +1,4 @@
+// /final-project/frontend/src/App.tsx
 import "./App.css";
 import { useAccount } from "wagmi";
 import { useState, useEffect } from "react";
@@ -14,6 +15,7 @@ import { Question as QuestionType } from "./types";
 import { Rewards } from "./components/Rewards";
 import ProgressBar from "./components/ProgressBar";
 import NFTDisplay from "./components/NFTDisplay";
+import ProfilePage from "./components/ProfilePage";
 
 declare global {
   namespace JSX {
@@ -31,7 +33,8 @@ declare global {
 }
 
 function App() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const [currentView, setCurrentView] = useState<'game' | 'profile'>('game');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [questions, setQuestions] = useState<QuestionType[]>([]);
@@ -212,6 +215,22 @@ function App() {
         </div>
 
         <div className="right-section">
+          {isConnected && (
+            <div className="nav-tabs">
+              <button 
+                className={`nav-tab ${currentView === 'game' ? 'active' : ''}`}
+                onClick={() => setCurrentView('game')}
+              >
+                Game
+              </button>
+              <button 
+                className={`nav-tab ${currentView === 'profile' ? 'active' : ''}`}
+                onClick={() => setCurrentView('profile')}
+              >
+                Profile
+              </button>
+            </div>
+          )}
           <div className="network-selector">
             <appkit-network-button />
           </div>
@@ -233,6 +252,8 @@ function App() {
               <appkit-button />
             </div>
           </div>
+        ) : currentView === 'profile' ? (
+          <ProfilePage address={address as `0x${string}`} />
         ) : hasAnswered ? (
           <div className="completion-screen">
             <h2>Congratulations!</h2>
