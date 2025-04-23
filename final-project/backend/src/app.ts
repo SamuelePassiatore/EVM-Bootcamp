@@ -6,6 +6,8 @@ import questionRouter from "./routes/question";
 import nftRewardRouter from "./routes/nftReward";
 import testingRouter from "./routes/testing";
 import Session from "express-session";
+import usersRouter from "./routes/users";
+import activityRouter from "./routes/activity";
 
 const app = express();
 
@@ -29,5 +31,7 @@ app.use("/auth", authRouter);
 app.use("/questions", questionRouter);
 app.use("/testing", testingRouter);
 app.use("/nft", nftRewardRouter);
+app.use("/users", usersRouter);
+app.use("/activity", activityRouter);
 
 export default app;
