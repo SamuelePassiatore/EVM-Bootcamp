@@ -104,11 +104,16 @@ export default class NFTRewardService {
           args: [user.walletAddress, tokenUri],
           account: this.account,
         });
+
+        const gasEstimate = await this.publicClient.estimateContractGas({
+          ...request,
+          account: this.account,
+        });
       
         const trxHash = await this.walletClient.writeContract({
           ...request,
           account: this.account,
-          gas: BigInt(1000000),
+          gas: gasEstimate * BigInt(2),
         });
         console.log(`Transaction submitted: ${trxHash}`);
         const receipt = await this.publicClient.waitForTransactionReceipt({ hash: trxHash });
