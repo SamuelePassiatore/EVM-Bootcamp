@@ -199,18 +199,18 @@ function App() {
   return (
     <>
       <header className="header">
-        <div className="left-section">
+        <div className="left-section" style={{ display: 'flex', alignItems: 'center' }}>
           <div className="logo" onClick={handleRefresh} style={{ cursor: 'pointer' }}>
             <img
               src="/quiz.png"
               alt="Logo"
             />
           </div>
+          <h1 style={{ marginLeft: '10px' }}>QuizChain</h1>
         </div>
 
         <div className="center-section">
           <div className="app-name">
-            <h1>QuizChain</h1>
           </div>
         </div>
 
