@@ -71,12 +71,16 @@ function App() {
         } else {
           console.log("No more questions, marking as completed");
           setHasAnswered(true); // Show completion screen
+          // No automatic minting here - the user will need to click the button
         }
       } catch (error) {
         console.error("Failed to update level:", error);
+        setError("Failed to update level. Please try again.");
       }
     }
   };
+
+  const currentQuestion = questions.find((q) => q.level === currentLevel);
 
   // Generate NFT preview based on current level and user ID
   useEffect(() => {
@@ -93,9 +97,11 @@ function App() {
     }
   }, [currentLevel, userData]);
 
+  // Fetch questions on component mount
   useEffect(() => {
     const loadQuestions = async () => {
       try {
+        setIsLoading(true);
         const data = await fetchQuestions();
         setQuestions(data);
 
@@ -116,6 +122,7 @@ function App() {
     loadQuestions();
   }, []);
 
+  // Load user data when connected
   useEffect(() => {
     const loadUserData = async () => {
       if (isConnected && questions.length > 0) {
@@ -166,8 +173,6 @@ function App() {
       setTimeout(() => setIsMintingAnimating(false), 1500);
     }
   };
-
-  const currentQuestion = questions.find((q) => q.level === currentLevel);
 
   if (isLoading) {
     return (
