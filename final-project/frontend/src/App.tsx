@@ -281,17 +281,6 @@ function App() {
                 onAnswer={handleAnswer}
               />
             </div>
-            
-            <div className="nft-preview-section">
-              {nftPreview && (
-                <NFTDisplay
-                  level={currentLevel}
-                  svgCode={nftPreview}
-                  isPreview={true}
-                />
-              )}
-            </div>
-            
             <Rewards />
           </div>
         ) : (

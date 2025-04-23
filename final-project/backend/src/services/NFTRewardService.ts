@@ -86,49 +86,51 @@ export default class NFTRewardService {
       
       console.log(`Minting NFT for wallet ${user.walletAddress}`);
       
-      // Prepare metadata URI - in a real app, this would point to a JSON file
-      const tokenURI = `data:application/json,{"name":"Level ${level} Reward","description":"NFT reward for completing level ${level}"}`;
+      const metadata = {
+        name: `Level ${level} Achievement`,
+        description: "NFT Reward for reaching level " + level,
+        image: `data:image/svg+xml;utf8,${encodeURIComponent(avatar)}`,
+      };
+    
+      const tokenUri = `data:application/json,${encodeURIComponent(
+        JSON.stringify(metadata),
+      )}`;
       
       try {
-        // Call mint function on the contract
-        const hash = await this.walletClient.writeContract({
-          chain: this.chain,
+        const { request, result } = await this.publicClient.simulateContract({
           address: getAddress(this.contractAddress),
           abi: contractJson.abi,
-          functionName: 'safeMint',
-          args: [getAddress(user.walletAddress), tokenURI],
+          functionName: "safeMint",
+          args: [user.walletAddress, tokenUri],
           account: this.account,
         });
-        
-        console.log(`Transaction submitted: ${hash}`);
-        
-        // Wait for transaction confirmation
-        const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
+      
+        const trxHash = await this.walletClient.writeContract({
+          ...request,
+          account: this.account,
+        });
+        console.log(`Transaction submitted: ${trxHash}`);
+        const receipt = await this.publicClient.waitForTransactionReceipt({ hash: trxHash });
         console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
-        
-        // For simplicity, use the block timestamp as the token ID
-        // In production, you would parse the Transfer event from the logs
-        const tokenId = receipt.blockNumber.toString();
-        
-        // Create a new NFT reward in the database
-        const newReward = new NFTReward({
+
+        const reward = await NFTReward.insertOne({
           level,
           svgCode: avatar,
-          tokenId,
+          tokenId: result,
           userId,
-          name: `Level ${level} Reward`,
-          description: `NFT reward for completing level ${level}`,
+          name: metadata.name,
+          description: metadata.description,
           createdAt: new Date(),
         });
-        
+
         // Save the new reward
-        await newReward.save();
-        console.log(`NFT reward saved to database with ID: ${newReward._id}`);
+        await reward.save();
+        console.log(`NFT reward saved to database with ID: ${reward._id}`);
         
         // Update user to mark NFT as minted
         await User.findByIdAndUpdate(userId, { mintedNFT: true });
-        
-        return newReward;
+
+        return reward;
       } catch (error) {
         console.error("Error in contract interaction:", error);
         const errorMessage = error instanceof Error
@@ -141,6 +143,7 @@ export default class NFTRewardService {
       throw error;
     }
   }
+  
 
   /**
    * Get all NFTs for a user
