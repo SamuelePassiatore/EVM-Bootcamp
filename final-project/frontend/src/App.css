@@ -666,12 +666,12 @@ body {
 }
 
 .nft-image {
-  width: 200px;
   height: 200px;
   transition: transform 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 40px;
 }
 
 .nft-display-card:hover .nft-image {
