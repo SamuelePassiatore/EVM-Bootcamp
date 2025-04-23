@@ -12,19 +12,233 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between, flex-start;
   align-items: center;
   padding: 15px 30px;
   background-color: #1e293b;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #334155;
-  height: 70px;
+  flex: 1;
 }
 
-.left-section {
-  flex: 1;
+/* Progress Bar Styling */
+.progress-container {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.level-indicator {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #334155;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-percentage {
+  text-align: right;
+  font-size: 14px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* Rewards Styling */
+.rewards-container {
+  background-color: #1e293b;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 20px;
+  border: 1px solid #334155;
+}
+
+.rewards-container h2 {
+  color: #38bdf8;
+  margin-bottom: 20px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.rewards-loading, .rewards-error {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+}
+
+.reward-placeholder {
+  background-color: #0f172a;
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  border: 1px dashed #334155;
+}
+
+.placeholder-image {
+  width: 100px;
+  height: 100px;
+  opacity: 0.5;
+}
+
+.reward-card {
+  background-color: #0f172a;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reward-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+.reward-image {
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1e293b;
+  padding: 16px;
+}
+
+.reward-details {
+  padding: 16px;
+}
+
+.reward-details h3 {
+  font-size: 18px;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+}
+
+.reward-details p {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.reward-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.token-id {
+  font-family: monospace;
+}
+
+/* NFT Display Styling */
+.nft-display {
+  background-color: #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #334155;
+}
+
+.nft-display h3 {
+  color: #38bdf8;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.nft-image-container {
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  background-color: #0f172a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.nft-placeholder-container {
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  background-color: #0f172a;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px dashed #334155;
+}
+
+.nft-placeholder-image img {
+  width: 120px;
+  height: 120px;
+  opacity: 0.5;
+}
+
+/* Minting Animation and Success Styling */
+@keyframes mintingAnimation {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.minting-animation {
+  animation: mintingAnimation 1.5s ease-out forwards;
+}
+
+.mint-success {
+  background-color: rgba(22, 163, 74, 0.15);
+  border: 1px solid #22c55e;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+  width: 100%;
+  max-width: 400px;
+}
+
+.mint-success p {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.mint-success .nft-preview {
+  width: 200px;
+  height: 200px;
+  margin: 16px auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+  animation: successPulse 3s infinite;
+}
+
+/* Game Container Layout */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  width: 100%;
 }
 
 .center-section {
@@ -161,58 +375,8 @@ body {
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
 }
 
-.question-text {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #f1f5f9;
-}
-
-.options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.option-button {
-  background-color: #334155;
-  border: 1px solid #4a5568;
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: #e2e8f0;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  text-align: left;
-}
-
 .option-button:hover {
   background-color: #3c4e6b;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background-color: #334155;
-  border-radius: 4px;
-  margin: 20px 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-fill {
-  position: absolute;
-  height: 100%;
-  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.level-indicator {
-  font-size: 14px;
-  color: #94a3b8;
-  margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
@@ -262,29 +426,6 @@ body {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
-.option-button.selected {
-  background-color: #4f46e5;
-  border-color: #6366f1;
-}
-
-.feedback-message {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.feedback-message.correct {
-  color: #2e7d32;
-  background-color: #e8f5e9;
-}
-
-.feedback-message.incorrect {
-  color: #c62828;
-  background-color: #ffebee;
-}
-
 .loading-screen {
   display: flex;
   flex-direction: column;
@@ -292,15 +433,6 @@ body {
   justify-content: center;
   height: 100vh;
   gap: 1rem;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #3498db;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -334,7 +466,7 @@ body {
   background: linear-gradient(90deg, #f7931a 0%, #f7b500 100%); /* Bitcoin orange gradient */
   color: white;
   font-weight: 600;
-  padding: 12px 24px;
+  padding: 14px 32px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -342,7 +474,12 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
 }
+
 
 .mint-nft-button:hover {
   transform: translateY(-2px);
@@ -356,35 +493,26 @@ body {
   box-shadow: none;
 }
 
-.mint-success {
-  margin-top: 24px;
-  padding: 16px;
-  background-color: rgba(46, 204, 113, 0.1);
-  border: 1px solid #22c55e;
-  border-radius: 8px;
-  color: #4ade80;
-}
-
 .completion-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 40px 30px;
+  padding: 40px;
   background-color: #1e293b;
   border-radius: 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border: 1px solid #334155;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
-  animation: fadeIn 0.5s ease forwards;
+  animation: fadeIn 0.5s ease;
 }
 
 .completion-screen h2 {
   font-size: 28px;
   color: #38bdf8;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   font-weight: 700;
 }
 
@@ -392,7 +520,7 @@ body {
   font-size: 18px;
   color: #94a3b8;
   line-height: 1.5;
-  margin-bottom: 10px;
+  margin-bottom: 24px;
 }
 
 .blocked-message {
@@ -422,6 +550,11 @@ body {
   border-radius: 8px;
   padding: 16px;
   border: 1px solid #4a5568;
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  color: #38bdf8;
+  letter-spacing: 2px;
+  text-align: center;
 }
 
 .timer p {
@@ -430,4 +563,437 @@ body {
   font-weight: 600;
   font-family: monospace;
   margin: 0;
+}
+
+/* NFT Animation Improvements */
+@keyframes nftPulse {
+  0% { transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+}
+
+/* Add subtle hover effects */
+.option-button:hover:not(.selected) {
+  background-color: #3c4e6b;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Improve NFT displays */
+.nft-success-container {
+  padding: 20px;
+  background-color: rgba(22, 163, 74, 0.1);
+  border-radius: 12px;
+  border: 1px solid #22c55e;
+  margin-top: 20px;
+}
+
+.submit-button:hover, .next-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes nftPulse {
+  0% { transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+}
+
+/* Spinner for loading states */
+.spinner {
+  border: 4px solid rgba(56, 189, 248, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #38bdf8;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+.spinner-small {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid #ffffff;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced NFT Display */
+.nft-display-card {
+  background-color: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nft-display-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.nft-title {
+  color: #f1f5f9;
+  font-size: 18px;
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  background-color: #0f172a;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nft-image-frame {
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+.nft-image {
+  width: 200px;
+  height: 200px;
+  transition: transform 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nft-display-card:hover .nft-image {
+  transform: scale(1.05);
+}
+
+.nft-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.nft-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-color: #1e293b;
+  border: 2px dashed #4a5568;
+}
+
+.placeholder-img {
+  width: 100px;
+  height: 100px;
+  opacity: 0.5;
+}
+
+.nft-details {
+  padding: 16px;
+  text-align: center;
+}
+
+.nft-description {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.nft-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: #64748b;
+  background-color: #0f172a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.nft-preview-label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(56, 189, 248, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Rewards Component */
+.your-nft-rewards {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #1e293b;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+.your-nft-rewards h2 {
+  color: #38bdf8;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.rewards-count {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #94a3b8;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.loading-rewards {
+  text-align: center;
+  padding: 30px;
+  color: #94a3b8;
+}
+
+.rewards-error {
+  text-align: center;
+  padding: 30px;
+  color: #ef4444;
+}
+
+.retry-button {
+  background-color: #334155;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #475569;
+}
+
+.no-rewards {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.no-rewards p {
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.empty-state-image {
+  width: 80px;
+  height: 80px;
+  opacity: 0.5;
+  margin-bottom: 16px;
+}
+
+.empty-state-subtitle {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Enhanced Question Component */
+.question-container {
+  background-color: #1e293b;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.question-level {
+  font-size: 14px;
+  color: #38bdf8;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.question-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #f1f5f9;
+  line-height: 1.4;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.option-button {
+  background-color: #334155;
+  border: 1px solid #4a5568;
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-button:hover:not(:disabled) {
+  background-color: #3c4e6b;
+  transform: translateY(-2px);
+}
+
+.option-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.option-button.selected {
+  background-color: #4f46e5;
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-message {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.feedback-message.correct {
+  background-color: rgba(22, 163, 74, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.feedback-message.incorrect {
+  background-color: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.submit-button, .next-button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+}
+
+.submit-button {
+  background: linear-gradient(90deg, #3861fb 0%, #4f46e5 100%);
+  color: white;
+  margin-top: 16px;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-button.loading {
+  background: #475569;
+}
+
+/* Minting animation */
+@keyframes mintingAnimation {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rewards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .nft-image-frame {
+    height: 200px;
+  }
+  
+  .question-text {
+    font-size: 18px;
+  }
+  
+  .completion-screen h2 {
+    font-size: 24px;
+  }
+  
+  .completion-screen p {
+    font-size: 16px;
+  }
+}
+
+.completion-note {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 12px;
+  font-style: italic;
+}
+
+.mint-nft-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nft-preview {
+  width: 250px;
+  height: 250px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #0f172a;
+  padding: 16px;
+  border: 1px solid #334155;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+  margin: 0 auto;
+}
+
+/* Success animation */
+@keyframes successPulse {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+  50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(74, 222, 128, 0.5); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
 }

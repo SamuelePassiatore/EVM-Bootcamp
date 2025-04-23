@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(
   Session({
     name: "final-project",
-    secret: process.env.SESSION_SECRET || "final-project-secret",
+    secret: process.env.SESSION_SECRET ?? "final-project-secret",
     resave: true,
     saveUninitialized: true,
     cookie: { secure: false, sameSite: "lax" },

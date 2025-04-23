@@ -1,5 +1,3 @@
-import { INFTReward } from "../shared/interface";
-
 interface Question {
   _id: string;
   level: number;
@@ -46,7 +44,7 @@ export const fetchQuestions = async (): Promise<Question[]> => {
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
     const data: Question[] = await response.json();
@@ -62,7 +60,7 @@ export const fetchQuestions = async (): Promise<Question[]> => {
   }
 };
 
-export const fetchRewards = async (): Promise<INFTReward[]> => {
+export const fetchRewards = async (): Promise<any[]> => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   if (!API_URL) {
@@ -70,8 +68,8 @@ export const fetchRewards = async (): Promise<INFTReward[]> => {
   }
 
   try {
-    const url = `${API_URL}/nft/rewards`;
-    const response = await fetch(url, {
+    const response = await fetch(`${API_URL}/nft/rewards`, {
+      method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -80,7 +78,7 @@ export const fetchRewards = async (): Promise<INFTReward[]> => {
     });
 
     console.debug("API Request:", {
-      url,
+      url: `${API_URL}/nft/rewards`,
       method: "GET",
       status: response.status,
     });
@@ -90,19 +88,18 @@ export const fetchRewards = async (): Promise<INFTReward[]> => {
         message: await response.text(),
       }));
 
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error(errorData.message ?? `HTTP ${response.status}`);
     }
 
-    const data: INFTReward[] = await response.json();
-    return data;
+    const data = await response.json();
+    return data ?? [];
   } catch (error) {
     console.error("API Error:", {
-      endpoint: "/questions",
+      endpoint: "/nft/rewards",
       error: error instanceof Error ? error.message : "Unknown error",
-      timestamp: new Date().toISOString(),
     });
-
-    throw error;
+    
+    return [];
   }
 };
 
