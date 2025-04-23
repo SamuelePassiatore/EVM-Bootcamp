@@ -61,7 +61,7 @@ router.post("/wrong-answer", isAuthenticated, async (req, res) => {
       { new: true }
     );
     
-    res.status(200).json({ success: true, blockedUntil: new Date(now.getTime() + 60000) });
+    res.status(200).json({ success: true, blockedUntil: new Date(now.getTime() + 12000) });
   } catch (error) {
     console.error("Error updating wrong answer status:", error);
     res.status(500).json({ message: "Server error" });

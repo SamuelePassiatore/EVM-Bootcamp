@@ -111,7 +111,7 @@ const Question: React.FC<QuestionProps> = ({
         
         // Set block with the time from the server response if available
         const now = new Date();
-        const blockDuration = 60000; // 1 minute default
+        const blockDuration = 12000; // 12 seconds
         
         let blockEndTime;
         if (response && response.blockedUntil) {
