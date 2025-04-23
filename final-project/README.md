@@ -103,8 +103,8 @@ Complete the following content to the `.env` file:
 MONGODB_URI=
 PORT=
 REOWN_PROJECT_ID=
-NFT_CONTRACT_HARDHAT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
-DEFAULT_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+NFT_CONTRACT_ADDRESS=0x3fb7Ad41D3F215435e448659046c9D83f1635118
+OWNER_PRIVATE_KEY=0xf412869e6352a7b92e0c99ac96eede7f48e03b29868527e2ea45d32dfe33d4cf
 ```
 
 With the following values:
@@ -115,8 +115,8 @@ With the following values:
 
 **Note**:
 
-- The `NFT_CONTRACT_HARDHAT_ADDRESS` is the address of the deployed contract on the local Hardhat network. You can leave it as is for now, as it will be updated after deploying the contract.
-- The `DEFAULT_PRIVATE_KEY` is the private key of the first account from the Hardhat node.
+- The `NFT_CONTRACT_ADDRESS` is the address of the deployed contract on Sepolia Testnet.
+- The `OWNER_PRIVATE_KEY` is the private key of the wallet that have deployed the smart contract.
 
 ### 2. Frontend Configuration
 
@@ -185,7 +185,7 @@ In another terminal:
 
 ```bash
 cd final-project/contracts
-npx hardhat run scripts/deploy.ts --network localhost
+npx hardhat run scripts/deploy.ts --network sepolia
 ```
 
 You should see a success message with the contract address. **Note this address** for future reference.
@@ -197,11 +197,6 @@ The contract will be deployed to the local Hardhat network. Note that the deploy
 1. Open your browser and navigate to <http://localhost:5173>
 2. You should see the QuizChain welcome page
 3. Click on the "Connect" button to connect your wallet
-   - You may need to configure MetaMask to connect to your local network:
-     - Network Name: Hardhat
-     - RPC URL: <http://127.0.0.1:8545>
-     - Chain ID: 31337
-     - Currency Symbol: ETH
 4. Once connected, you can start answering blockchain questions
 5. Complete the quiz to see your progress saved
 
